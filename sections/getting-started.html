@@ -1,0 +1,140 @@
+<!-- ======================== 安装 ======================== -->
+<section class="content-section" id="installation">
+  <div class="section-header">
+    <span class="section-tag">安装</span>
+    <h2>安装指南</h2>
+    <p>需要 Node.js 20.19.0 或更高版本</p>
+  </div>
+  <div class="install-tabs">
+    <button class="tab-btn active" data-tab="npm">npm</button>
+    <button class="tab-btn" data-tab="pnpm">pnpm</button>
+    <button class="tab-btn" data-tab="yarn">yarn</button>
+    <button class="tab-btn" data-tab="bun">bun</button>
+    <button class="tab-btn" data-tab="nix">Nix</button>
+  </div>
+  <div class="tab-content active" data-content="npm">
+    <div class="code-block">
+      <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>npm install -g @fission-ai/openspec@latest</code></pre>
+    </div>
+  </div>
+  <div class="tab-content" data-content="pnpm">
+    <div class="code-block">
+      <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>pnpm add -g @fission-ai/openspec@latest</code></pre>
+    </div>
+  </div>
+  <div class="tab-content" data-content="yarn">
+    <div class="code-block">
+      <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>yarn global add @fission-ai/openspec@latest</code></pre>
+    </div>
+  </div>
+  <div class="tab-content" data-content="bun">
+    <div class="code-block">
+      <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>bun add -g @fission-ai/openspec@latest</code></pre>
+    </div>
+  </div>
+  <div class="tab-content" data-content="nix">
+    <div class="code-block">
+      <div class="code-header"><span>bash — 直接运行（无需安装）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>nix run github:Fission-AI/OpenSpec -- init</code></pre>
+    </div>
+    <div class="code-block" style="margin-top:12px">
+      <div class="code-header"><span>bash — 安装到 profile</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>nix profile install github:Fission-AI/OpenSpec</code></pre>
+    </div>
+  </div>
+  <div class="info-box">
+    <div class="info-icon">💡</div>
+    <div>
+      <strong>验证安装</strong><br>
+      <code>openspec --version</code>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== 快速开始 ======================== -->
+<section class="content-section" id="getting-started">
+  <div class="section-header">
+    <span class="section-tag">快速开始</span>
+    <h2>开始你的第一个变更</h2>
+    <p>初始化项目，与 AI 协作完成一个完整的功能开发流程</p>
+  </div>
+
+  <div class="steps-container">
+    <div class="step">
+      <div class="step-number">1</div>
+      <div class="step-content">
+        <h3>初始化项目</h3>
+        <p>进入你的项目目录，运行初始化命令。这将创建 OpenSpec 目录结构并为你的 AI 工具生成配置文件。</p>
+        <div class="code-block">
+          <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>cd your-project
+openspec init</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">2</div>
+      <div class="step-content">
+        <h3>创建你的第一个变更</h3>
+        <p>在 AI 对话窗口中，使用 <code>/opsx:propose</code> 命令描述你想要构建的功能。AI 会自动创建所有必要的规划产物。</p>
+        <div class="code-block">
+          <div class="code-header"><span>AI 对话</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>/opsx:propose add-dark-mode</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">3</div>
+      <div class="step-content">
+        <h3>实现任务</h3>
+        <p>规划产物生成完毕后，运行 <code>/opsx:apply</code> 让 AI 按照任务清单逐步实现代码。</p>
+        <div class="code-block">
+          <div class="code-header"><span>AI 对话</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>/opsx:apply</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-number">4</div>
+      <div class="step-content">
+        <h3>归档变更</h3>
+        <p>完成实现后，运行 <code>/opsx:archive</code> 将 Delta 规范合并到主规范，并将变更文件夹移至归档目录。</p>
+        <div class="code-block">
+          <div class="code-header"><span>AI 对话</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>/opsx:archive</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box info-tip">
+    <div class="info-icon">🔥</div>
+    <div>
+      <strong>新功能：扩展工作流</strong><br>
+      如需更细粒度的控制（<code>/opsx:new</code>、<code>/opsx:ff</code>、<code>/opsx:verify</code> 等），
+      运行 <code>openspec config profile</code> 选择工作流，然后执行 <code>openspec update</code> 更新配置。
+    </div>
+  </div>
+
+  <h3 style="margin-top: 2rem;">初始化后的目录结构</h3>
+  <div class="code-block">
+    <div class="code-header"><span>目录结构</span></div>
+    <pre><code>openspec/
+├── specs/              # 主规范（当前系统行为的权威基准）
+│   └── &lt;domain&gt;/
+│       └── spec.md
+├── changes/            # 提议中的变更（每个变更独立文件夹）
+│   └── &lt;change-name&gt;/
+│       ├── proposal.md    # 为什么做、做什么
+│       ├── design.md      # 如何实现
+│       ├── tasks.md       # 实现任务清单
+│       └── specs/         # Delta 规范（正在变化的部分）
+│           └── &lt;domain&gt;/
+│               └── spec.md
+└── config.yaml         # 项目配置（可选）</code></pre>
+  </div>
+</section>

@@ -1,0 +1,295 @@
+<!-- ======================== CLI 参考 ======================== -->
+<section class="content-section" id="cli">
+  <div class="section-header">
+    <span class="section-tag">CLI 参考</span>
+    <h2>终端命令完整参考</h2>
+    <p>openspec CLI 提供项目设置、验证、状态检查和管理的终端命令</p>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="doc-table">
+      <thead><tr><th>分类</th><th>命令</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><strong>设置</strong></td><td><code>init</code>、<code>update</code></td><td>初始化和更新项目中的 OpenSpec</td></tr>
+        <tr><td><strong>浏览</strong></td><td><code>list</code>、<code>view</code>、<code>show</code></td><td>探索变更和规范</td></tr>
+        <tr><td><strong>验证</strong></td><td><code>validate</code></td><td>检查变更和规范的问题</td></tr>
+        <tr><td><strong>生命周期</strong></td><td><code>archive</code></td><td>完成已完成的变更</td></tr>
+        <tr><td><strong>工作流</strong></td><td><code>status</code>、<code>instructions</code>、<code>templates</code>、<code>schemas</code></td><td>产物驱动的工作流支持</td></tr>
+        <tr><td><strong>Schema</strong></td><td><code>schema init</code>、<code>schema fork</code>、<code>schema validate</code>、<code>schema which</code></td><td>创建和管理自定义工作流</td></tr>
+        <tr><td><strong>配置</strong></td><td><code>config</code></td><td>查看和修改设置</td></tr>
+        <tr><td><strong>工具</strong></td><td><code>feedback</code>、<code>completion</code></td><td>反馈和 Shell 集成</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 初始化与更新 -->
+  <div class="subsection" id="cli-setup">
+    <h3>初始化与更新</h3>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec init</code>
+        <span class="cli-desc">在项目中初始化 OpenSpec</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec init [path] [options]</code></pre>
+        </div>
+        <div class="table-wrapper">
+          <table class="doc-table">
+            <thead><tr><th>选项</th><th>描述</th></tr></thead>
+            <tbody>
+              <tr><td><code>--tools &lt;list&gt;</code></td><td>非交互式配置 AI 工具。使用 all、none 或逗号分隔的列表</td></tr>
+              <tr><td><code>--force</code></td><td>自动清理旧文件，无需提示</td></tr>
+              <tr><td><code>--profile &lt;profile&gt;</code></td><td>覆盖此次初始化的全局 profile（core 或 custom）</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># 交互式初始化
+openspec init
+
+# 非交互式：配置 Claude 和 Cursor
+openspec init --tools claude,cursor
+
+# 配置所有支持的工具
+openspec init --tools all
+
+# 覆盖 profile
+openspec init --profile core</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec update</code>
+        <span class="cli-desc">升级 CLI 后更新 OpenSpec 指令文件</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># npm 升级后更新指令文件
+npm update @fission-ai/openspec
+openspec update</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 浏览命令 -->
+  <div class="subsection" id="cli-browse">
+    <h3>浏览命令</h3>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec list</code>
+        <span class="cli-desc">列出项目中的变更或规范</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># 列出所有活跃变更
+openspec list
+
+# 列出所有规范
+openspec list --specs
+
+# JSON 输出（用于脚本）
+openspec list --json</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec show</code>
+        <span class="cli-desc">显示变更或规范的详情</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># 显示特定变更
+openspec show add-dark-mode
+
+# JSON 输出用于解析
+openspec show add-dark-mode --json</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 验证命令 -->
+  <div class="subsection" id="cli-validate">
+    <h3>验证命令</h3>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec validate</code>
+        <span class="cli-desc">验证变更和规范的结构问题</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># 验证特定变更
+openspec validate add-dark-mode
+
+# 验证所有变更
+openspec validate --changes
+
+# 验证所有内容并输出 JSON（用于 CI）
+openspec validate --all --json
+
+# 严格模式
+openspec validate --all --strict --concurrency 12</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 生命周期命令 -->
+  <div class="subsection" id="cli-lifecycle">
+    <h3>生命周期命令</h3>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec archive</code>
+        <span class="cli-desc">归档已完成的变更并将 Delta 规范合并到主规范</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># 归档特定变更
+openspec archive add-dark-mode
+
+# 无提示归档（CI/脚本）
+openspec archive add-dark-mode --yes
+
+# 归档不影响规范的工具变更
+openspec archive update-ci-config --skip-specs</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 工作流命令 -->
+  <div class="subsection" id="cli-workflow">
+    <h3>工作流命令</h3>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec status</code>
+        <span class="cli-desc">显示变更的产物完成状态</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec status --change add-dark-mode
+
+# 输出:
+# Change: add-dark-mode
+# Schema: spec-driven
+# Progress: 2/4 artifacts complete
+#
+# [x] proposal
+# [ ] design
+# [x] specs
+# [-] tasks (blocked by: design)</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schema 命令 -->
+  <div class="subsection" id="cli-schema">
+    <h3>Schema 命令</h3>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec schema init</code>
+        <span class="cli-desc">创建新的项目本地 Schema</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># 交互式创建 Schema
+openspec schema init research-first
+
+# 非交互式
+openspec schema init rapid \
+  --description "快速迭代工作流" \
+  --artifacts "proposal,tasks" \
+  --default</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec schema fork</code>
+        <span class="cli-desc">复制现有 Schema 到项目以进行自定义</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># Fork 内置的 spec-driven schema
+openspec schema fork spec-driven my-workflow</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      <div class="info-icon">🔢</div>
+      <div>
+        <strong>Schema 优先级</strong><br>
+        1. 项目级：openspec/schemas/&lt;name&gt;/<br>
+        2. 用户级：~/.local/share/openspec/schemas/&lt;name&gt;/<br>
+        3. 包级：内置 Schema
+      </div>
+    </div>
+  </div>
+
+  <!-- 配置命令 -->
+  <div class="subsection" id="cli-config">
+    <h3>配置命令</h3>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec config</code>
+        <span class="cli-desc">查看和修改全局 OpenSpec 配置</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># 列出所有设置
+openspec config list
+
+# 获取特定值
+openspec config get telemetry.enabled
+
+# 设置值
+openspec config set telemetry.enabled false
+
+# 配置工作流 profile
+openspec config profile
+
+# 快速切换到 core profile
+openspec config profile core
+
+# 在编辑器中编辑
+openspec config edit</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 环境变量 -->
+  <div class="subsection">
+    <h3>环境变量</h3>
+    <div class="table-wrapper">
+      <table class="doc-table">
+        <thead><tr><th>变量</th><th>描述</th></tr></thead>
+        <tbody>
+          <tr><td><code>OPENSPEC_CONCURRENCY</code></td><td>批量验证的默认并发数（默认: 6）</td></tr>
+          <tr><td><code>EDITOR</code> 或 <code>VISUAL</code></td><td>openspec config edit 使用的编辑器</td></tr>
+          <tr><td><code>NO_COLOR</code></td><td>设置时禁用彩色输出</td></tr>
+          <tr><td><code>OPENSPEC_TELEMETRY=0</code></td><td>禁用遥测数据收集</td></tr>
+          <tr><td><code>DO_NOT_TRACK=1</code></td><td>全局禁用追踪</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

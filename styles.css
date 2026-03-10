@@ -140,6 +140,28 @@ body {
   border: 1px solid var(--border);
 }
 
+/* 动态加载区域 */
+.dynamic-section { min-height: 2rem; }
+.section-loading {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  padding: 4rem 0;
+}
+.loading-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.3;
+  animation: loadingPulse 1.2s infinite ease-in-out;
+}
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes loadingPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
 .nav-link-upstream {
   margin-left: 0;
   opacity: 0.65;
@@ -247,6 +269,22 @@ body {
   background: none;
   padding: 0;
   color: inherit;
+}
+
+.sidebar-link-sub {
+  padding-left: 1.2rem;
+  font-size: 0.78rem;
+  opacity: 0.85;
+  position: relative;
+}
+
+.sidebar-link-sub::before {
+  content: '└';
+  position: absolute;
+  left: 0.4rem;
+  color: var(--border);
+  font-size: 0.72rem;
+  line-height: 1.8;
 }
 
 /* ==========================================
@@ -2031,4 +2069,164 @@ body {
 ::selection {
   background: rgba(99, 102, 241, 0.3);
   color: #fff;
+}
+
+/* ==========================================
+   更新历史时间轴样式
+   ========================================== */
+.changelog-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.changelog-timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 6px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent), transparent);
+  border-radius: 1px;
+}
+
+.changelog-item {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.changelog-item:last-child {
+  margin-bottom: 0;
+}
+
+.changelog-marker {
+  position: absolute;
+  left: -1.85rem;
+  top: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+  transition: box-shadow 0.3s;
+}
+
+.changelog-item:hover .changelog-marker {
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.9);
+}
+
+.changelog-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.3s;
+}
+
+.changelog-item:hover .changelog-content {
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.changelog-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.changelog-version {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(99, 102, 241, 0.12);
+  padding: 2px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  letter-spacing: 0.04em;
+}
+
+.changelog-date {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.changelog-summary {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+/* 详情折叠区域 */
+.changelog-details {
+  display: none;
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+.changelog-details.expanded {
+  display: block;
+  animation: fadeInDown 0.25s ease;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.changelog-details ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.changelog-details li {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.changelog-details li::marker {
+  color: var(--accent);
+}
+
+/* 展开/收起按钮 */
+.changelog-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 0.75rem;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.changelog-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.changelog-toggle svg {
+  transition: transform 0.25s;
+}
+
+.changelog-toggle.open svg {
+  transform: rotate(180deg);
+}
+
+.changelog-toggle.open {
+  border-color: rgba(99, 102, 241, 0.4);
+  color: var(--accent);
 }

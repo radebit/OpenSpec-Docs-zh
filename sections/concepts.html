@@ -1,0 +1,393 @@
+<!-- ======================== 核心概念 ======================== -->
+<section class="content-section" id="concepts">
+  <div class="section-header">
+    <span class="section-tag">核心概念</span>
+    <h2>理解 OpenSpec 的核心机制</h2>
+    <p>深入了解规范、变更、产物和 Delta 机制如何协同工作</p>
+  </div>
+
+  <!-- 设计哲学 -->
+  <div class="subsection" id="concepts-philosophy">
+    <h3>设计哲学</h3>
+    <p>OpenSpec 围绕四个核心原则构建：</p>
+    <div class="philosophy-grid">
+      <div class="phi-card">
+        <div class="phi-icon">🌊</div>
+        <h4>流动而非僵化</h4>
+        <p>传统规范系统将你锁定在阶段中：先规划，再实现，然后完成。OpenSpec 更灵活——你可以以任何有意义的顺序创建产物。</p>
+      </div>
+      <div class="phi-card">
+        <div class="phi-icon">🔄</div>
+        <h4>迭代而非瀑布</h4>
+        <p>需求会变化，理解会加深。最初看起来不错的方案在看到代码库后可能无法成立。OpenSpec 拥抱这种现实。</p>
+      </div>
+      <div class="phi-card">
+        <div class="phi-icon">✨</div>
+        <h4>简单而非复杂</h4>
+        <p>一些规范框架需要大量设置、严格格式或繁重流程。OpenSpec 不挡你的路。几秒钟初始化，立即开始工作。</p>
+      </div>
+      <div class="phi-card">
+        <div class="phi-icon">🏗️</div>
+        <h4>存量项目优先</h4>
+        <p>大多数软件工作不是从零开始，而是在已有系统上迭代改造。OpenSpec 基于 Delta 的方法，让描述"改了什么"变得自然而直观。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 大局观 -->
+  <div class="subsection" id="concepts-big-picture">
+    <h3>整体架构</h3>
+    <p>OpenSpec 将你的工作组织为两个主要区域：</p>
+    <div class="arch-diagram">
+      <div class="arch-box arch-specs">
+        <div class="arch-label">specs/</div>
+        <div class="arch-desc">权威基准<br>描述系统当前行为</div>
+      </div>
+      <div class="arch-arrow">
+        <div class="arch-arrow-label">归档时合并</div>
+        <svg width="60" height="20" viewBox="0 0 60 20"><line x1="0" y1="10" x2="50" y2="10" stroke="#6366f1" stroke-width="2"/><polygon points="50,5 60,10 50,15" fill="#6366f1"/></svg>
+      </div>
+      <div class="arch-box arch-changes">
+        <div class="arch-label">changes/</div>
+        <div class="arch-desc">提议中的修改<br>每个变更 = 一个文件夹</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <div class="info-icon">💡</div>
+      <div>这种分离是关键。你可以并行处理多个变更而不发生冲突，在变更影响主规范之前先进行审查，归档时 Delta 会干净地合并回主规范。</div>
+    </div>
+  </div>
+
+  <!-- 规范 -->
+  <div class="subsection" id="concepts-specs">
+    <h3>规范 (Specs)</h3>
+    <p>规范使用结构化需求和场景来描述系统行为。一个典型的规范文件如下：</p>
+    <div class="code-block">
+      <div class="code-header"><span>openspec/specs/auth/spec.md</span></div>
+      <pre><code># Auth 规范
+
+## 目的
+应用程序的身份验证和会话管理。
+
+## 需求
+
+### 需求：用户身份验证
+系统 SHALL 在登录成功时颁发 JWT 令牌。
+
+#### 场景：有效凭据
+- GIVEN 用户具有有效凭据
+- WHEN 用户提交登录表单
+- THEN 返回 JWT 令牌
+- AND 用户被重定向到仪表板
+
+#### 场景：无效凭据
+- GIVEN 无效凭据
+- WHEN 用户提交登录表单
+- THEN 显示错误消息
+- AND 不颁发令牌</code></pre>
+    </div>
+    <div class="table-wrapper">
+      <table class="doc-table">
+        <thead><tr><th>元素</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td><code>## 目的</code></td><td>该规范领域的高层描述</td></tr>
+          <tr><td><code>### 需求：</code></td><td>系统必须具备的具体行为</td></tr>
+          <tr><td><code>#### 场景：</code></td><td>需求的具体示例（可验证的）</td></tr>
+          <tr><td>SHALL / MUST / SHOULD</td><td>RFC 2119 关键词，表示需求强度</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tip-box">
+      <strong>规范的本质</strong>：规范是<strong>行为契约</strong>，而非实现计划。好的规范内容包括可观察行为、输入/输出/错误条件、外部约束。避免在规范中写内部类名、库或框架选择、逐步实现细节。
+    </div>
+  </div>
+
+  <!-- 变更 -->
+  <div class="subsection" id="concepts-changes">
+    <h3>变更 (Changes)</h3>
+    <p>变更是对系统的提议修改，打包为一个包含理解和实现所需一切的文件夹：</p>
+    <div class="code-block">
+      <div class="code-header"><span>变更文件夹结构</span></div>
+      <pre><code>openspec/changes/add-dark-mode/
+├── proposal.md           # 为什么做、做什么
+├── design.md             # 如何实现（技术方案）
+├── tasks.md              # 实现任务清单（带复选框）
+├── .openspec.yaml        # 变更元数据（可选）
+└── specs/                # Delta 规范
+    └── ui/
+        └── spec.md       # ui/spec.md 中正在变化的内容</code></pre>
+    </div>
+    <div class="cards-grid">
+      <div class="feature-card">
+        <div class="card-icon">📦</div>
+        <h3>一切在一起</h3>
+        <p>提案、设计、任务和规范都在一处。无需在不同位置寻找信息。</p>
+      </div>
+      <div class="feature-card">
+        <div class="card-icon">⚡</div>
+        <h3>并行工作</h3>
+        <p>多个变更可以同时存在而不冲突。在修复 bug 的同时开发新功能。</p>
+      </div>
+      <div class="feature-card">
+        <div class="card-icon">📚</div>
+        <h3>清晰历史</h3>
+        <p>归档时，变更移至 archive/ 并保留完整上下文，方便日后追溯原因。</p>
+      </div>
+      <div class="feature-card">
+        <div class="card-icon">🔍</div>
+        <h3>便于审查</h3>
+        <p>变更文件夹易于审查——打开它，阅读提案，检查设计，查看规范 Delta。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 产物 -->
+  <div class="subsection" id="concepts-artifacts">
+    <h3>产物 (Artifacts)</h3>
+    <p>产物是变更中指导工作的文档，它们相互构建，每个产物为下一个提供上下文：</p>
+    <div class="artifact-flow">
+      <div class="af-node">
+        <div class="af-name">proposal.md</div>
+        <div class="af-desc">为什么做 + 范围</div>
+      </div>
+      <div class="af-arrow">→</div>
+      <div class="af-node">
+        <div class="af-name">specs/</div>
+        <div class="af-desc">变化的内容</div>
+      </div>
+      <div class="af-arrow">→</div>
+      <div class="af-node">
+        <div class="af-name">design.md</div>
+        <div class="af-desc">技术方案</div>
+      </div>
+      <div class="af-arrow">→</div>
+      <div class="af-node">
+        <div class="af-name">tasks.md</div>
+        <div class="af-desc">实现步骤</div>
+      </div>
+    </div>
+
+    <div class="accordion" id="artifacts-accordion">
+      <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <span>📄 Proposal — 提案文档</span>
+          <span class="accordion-icon">+</span>
+        </div>
+        <div class="accordion-body">
+          <p>提案捕捉意图、范围和高层方案：</p>
+          <div class="code-block">
+            <div class="code-header"><span>proposal.md 示例</span></div>
+            <pre><code># 提案：添加暗色模式
+
+## 意图
+用户希望有一个暗色模式选项，以减少夜间使用时的眼睛疲劳。
+
+## 范围
+包含：主题切换按钮、系统偏好检测、本地存储持久化
+不包含：自定义颜色主题（未来工作）
+
+## 方案
+使用 CSS 自定义属性进行主题设置，React Context 进行状态管理。</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <span>📐 Design — 设计文档</span>
+          <span class="accordion-icon">+</span>
+        </div>
+        <div class="accordion-body">
+          <p>设计文档捕捉技术方案和架构决策：</p>
+          <div class="code-block">
+            <div class="code-header"><span>design.md 示例</span></div>
+            <pre><code># 设计：添加暗色模式
+
+## 技术方案
+主题状态通过 React Context 管理以避免 prop drilling。
+CSS 自定义属性支持运行时切换而无需切换 class。
+
+## 架构决策
+
+### 决策：Context 而非 Redux
+使用 React Context 的原因：
+- 简单的二值状态（亮/暗）
+- 无复杂状态转换
+- 避免引入 Redux 依赖</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <span>✅ Tasks — 任务清单</span>
+          <span class="accordion-icon">+</span>
+        </div>
+        <div class="accordion-body">
+          <p>任务是带复选框的具体实现步骤：</p>
+          <div class="code-block">
+            <div class="code-header"><span>tasks.md 示例</span></div>
+            <pre><code># 任务
+
+## 1. 主题基础设施
+- [ ] 1.1 创建带有亮/暗状态的 ThemeContext
+- [ ] 1.2 为颜色添加 CSS 自定义属性
+- [ ] 1.3 实现 localStorage 持久化
+- [ ] 1.4 添加系统偏好检测
+
+## 2. UI 组件
+- [ ] 2.1 创建 ThemeToggle 组件
+- [ ] 2.2 在设置页面添加切换
+- [ ] 2.3 更新 Header 包含快速切换
+
+## 3. 样式
+- [ ] 3.1 定义暗色主题调色板
+- [ ] 3.2 更新组件使用 CSS 变量</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delta 规范 -->
+  <div class="subsection" id="concepts-delta">
+    <h3>Delta 规范</h3>
+    <p>Delta 规范是让 OpenSpec 适用于<strong>已有项目改造</strong>的关键概念。它们描述<strong>正在变化的内容</strong>，而不是重新陈述整个规范。</p>
+    <div class="code-block">
+      <div class="code-header"><span>Delta 规范格式示例</span></div>
+      <pre><code># Auth 的 Delta 规范
+
+## ADDED Requirements（新增需求）
+
+### 需求：双因素认证
+系统 MUST 支持基于 TOTP 的双因素认证。
+
+#### 场景：2FA 登录
+- GIVEN 启用了 2FA 的用户
+- WHEN 用户提交有效凭据
+- THEN 呈现 OTP 挑战
+- AND 仅在有效 OTP 后完成登录
+
+## MODIFIED Requirements（修改需求）
+
+### 需求：会话过期
+系统 MUST 在 15 分钟不活动后使会话过期。
+（之前：30 分钟）
+
+## REMOVED Requirements（删除需求）
+
+### 需求：记住我
+（因支持 2FA 而废弃。用户应在每次会话重新认证。）</code></pre>
+    </div>
+    <div class="table-wrapper">
+      <table class="doc-table">
+        <thead><tr><th>Delta 节</th><th>含义</th><th>归档时操作</th></tr></thead>
+        <tbody>
+          <tr><td><code>## ADDED Requirements</code></td><td>新行为</td><td>追加到主规范</td></tr>
+          <tr><td><code>## MODIFIED Requirements</code></td><td>变更的行为</td><td>替换现有需求</td></tr>
+          <tr><td><code>## REMOVED Requirements</code></td><td>废弃的行为</td><td>从主规范中删除</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Schema 机制 -->
+  <div class="subsection" id="concepts-schemas">
+    <h3>Schema 机制</h3>
+    <p>Schema 定义工作流的产物类型及其依赖关系。默认 Schema 为 <code>spec-driven</code>：</p>
+    <div class="code-block">
+      <div class="code-header"><span>schema.yaml 示例</span></div>
+      <pre><code>name: spec-driven
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    requires: []              # 无依赖，可以先创建
+
+  - id: specs
+    generates: specs/**/*.md
+    requires: [proposal]      # 需要提案后才能创建
+
+  - id: design
+    generates: design.md
+    requires: [proposal]      # 可与 specs 并行创建
+
+  - id: tasks
+    generates: tasks.md
+    requires: [specs, design] # 需要 specs 和 design 都完成</code></pre>
+    </div>
+    <div class="dependency-graph">
+      <div class="dep-node dep-root">proposal<br><small>根节点</small></div>
+      <div class="dep-row">
+        <div class="dep-node">specs<br><small>依赖: proposal</small></div>
+        <div class="dep-node">design<br><small>依赖: proposal</small></div>
+      </div>
+      <div class="dep-node dep-leaf">tasks<br><small>依赖: specs + design</small></div>
+    </div>
+  </div>
+
+  <!-- 完整流程 -->
+  <div class="subsection" id="concepts-archive">
+    <h3>完整工作流程</h3>
+    <div class="flow-diagram">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-text">
+          <strong>启动变更</strong><br>
+          <code>/opsx:propose</code> 或 <code>/opsx:new</code>
+        </div>
+      </div>
+      <div class="flow-arrow-v">↓</div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-text">
+          <strong>创建产物</strong><br>
+          proposal → specs → design → tasks
+        </div>
+      </div>
+      <div class="flow-arrow-v">↓</div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-text">
+          <strong>实现任务</strong><br>
+          <code>/opsx:apply</code>
+        </div>
+      </div>
+      <div class="flow-arrow-v">↓</div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-text">
+          <strong>验证工作（可选）</strong><br>
+          <code>/opsx:verify</code>
+        </div>
+      </div>
+      <div class="flow-arrow-v">↓</div>
+      <div class="flow-step flow-step-final">
+        <div class="flow-num">5</div>
+        <div class="flow-text">
+          <strong>归档变更</strong><br>
+          Delta 合并入主规范，变更文件夹移至 archive/
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 术语表 -->
+  <div class="subsection" id="glossary">
+    <h3>术语表</h3>
+    <div class="table-wrapper">
+      <table class="doc-table">
+        <thead><tr><th>术语</th><th>定义</th></tr></thead>
+        <tbody>
+          <tr><td><strong>产物 (Artifact)</strong></td><td>变更中的文档（proposal、design、tasks 或 Delta 规范）</td></tr>
+          <tr><td><strong>归档 (Archive)</strong></td><td>完成变更并将其 Delta 合并到主规范的过程</td></tr>
+          <tr><td><strong>变更 (Change)</strong></td><td>打包为带有产物的文件夹的系统提议修改</td></tr>
+          <tr><td><strong>Delta 规范</strong></td><td>描述变化（ADDED/MODIFIED/REMOVED）的规范</td></tr>
+          <tr><td><strong>领域 (Domain)</strong></td><td>规范的逻辑分组（如 auth/、payments/）</td></tr>
+          <tr><td><strong>需求 (Requirement)</strong></td><td>系统必须具备的具体行为</td></tr>
+          <tr><td><strong>场景 (Scenario)</strong></td><td>需求的具体示例，通常采用 Given/When/Then 格式</td></tr>
+          <tr><td><strong>Schema</strong></td><td>产物类型及其依赖关系的定义</td></tr>
+          <tr><td><strong>规范 (Spec)</strong></td><td>描述系统行为的规格说明</td></tr>
+          <tr><td><strong>权威基准</strong></td><td>openspec/specs/ 目录，包含当前一致同意的行为，是所有规范的最终依据</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

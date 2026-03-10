@@ -1,0 +1,394 @@
+<!-- ======================== 工作流命令参考 ======================== -->
+<section class="content-section" id="commands">
+  <div class="section-header">
+    <span class="section-tag">命令参考</span>
+    <h2>OPSX Slash 命令</h2>
+    <p>在 AI 编码助手的对话界面中调用（如 Claude Code、Cursor、Windsurf）</p>
+  </div>
+
+  <div class="cmd-quick-ref">
+    <div class="qr-group">
+      <div class="qr-title">默认快速路径（core profile）</div>
+      <div class="qr-grid">
+        <div class="qr-item"><code>/opsx:propose</code><span>创建变更并一键生成规划产物</span></div>
+        <div class="qr-item"><code>/opsx:explore</code><span>在提交变更前思考和探索想法</span></div>
+        <div class="qr-item"><code>/opsx:apply</code><span>实现变更中的任务</span></div>
+        <div class="qr-item"><code>/opsx:archive</code><span>归档已完成的变更</span></div>
+      </div>
+    </div>
+    <div class="qr-group">
+      <div class="qr-title">扩展工作流命令（自定义选择）</div>
+      <div class="qr-grid">
+        <div class="qr-item"><code>/opsx:new</code><span>创建新变更脚手架</span></div>
+        <div class="qr-item"><code>/opsx:continue</code><span>按依赖顺序创建下一个产物</span></div>
+        <div class="qr-item"><code>/opsx:ff</code><span>快进：一次创建所有规划产物</span></div>
+        <div class="qr-item"><code>/opsx:verify</code><span>验证实现是否与产物匹配</span></div>
+        <div class="qr-item"><code>/opsx:sync</code><span>将 Delta 规范合并到主规范</span></div>
+        <div class="qr-item"><code>/opsx:bulk-archive</code><span>批量归档多个变更</span></div>
+        <div class="qr-item"><code>/opsx:onboard</code><span>引导式完整工作流教程</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 各命令详情 -->
+  <div class="cmd-list">
+
+    <div class="cmd-card" id="cmd-propose">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:propose</code></div>
+        <div class="cmd-badge badge-core">core profile</div>
+      </div>
+      <p class="cmd-desc">创建新变更并一步生成所有规划产物。这是 core profile 中的默认启动命令。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:propose [变更名或描述]</code>
+      </div>
+      <div class="table-wrapper">
+        <table class="doc-table">
+          <thead><tr><th>参数</th><th>必填</th><th>描述</th></tr></thead>
+          <tbody>
+            <tr><td><code>change-name-or-description</code></td><td>否</td><td>kebab-case 名称或自然语言描述</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <pre><code>You: /opsx:propose add-dark-mode
+
+AI:  已创建 openspec/changes/add-dark-mode/
+     ✓ proposal.md
+     ✓ specs/ui/spec.md
+     ✓ design.md
+     ✓ tasks.md
+     准备好实现。运行 /opsx:apply。</code></pre>
+      </div>
+      <div class="tip-box">如果你想分步骤控制产物创建，请启用扩展工作流并使用 <code>/opsx:new</code> + <code>/opsx:continue</code>。</div>
+    </div>
+
+    <div class="cmd-card" id="cmd-explore">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:explore</code></div>
+        <div class="cmd-badge badge-core">core profile</div>
+      </div>
+      <p class="cmd-desc">在提交变更之前，思考想法、调查问题、澄清需求。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:explore [话题]</code>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <pre><code>You: /opsx:explore
+
+AI:  你想探索什么？
+
+You: 如何为移动端应用处理身份验证？
+
+AI:  让我来研究你当前的认证设置...
+     [分析代码库]
+
+     我看到你在 Web 端使用了基于 session 的认证。
+     对于移动端，我们有三种主要选择：
+
+     1. JWT 令牌（无状态，支持离线）
+     2. OAuth2（如需第三方登录）
+     3. 扩展当前 session（更简单，但需要连接）
+
+     你的 API 已经配置了 CORS。你对哪个方向感兴趣？
+
+You: 让我们用 JWT。能开始一个变更吗？
+
+AI:  准备好了。运行 /opsx:propose add-jwt-auth 开始。</code></pre>
+      </div>
+      <div class="tip-box">探索期间不会创建产物。适合在决定之前比较多种方案。</div>
+    </div>
+
+    <div class="cmd-card" id="cmd-new">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:new</code></div>
+        <div class="cmd-badge badge-expanded">扩展工作流</div>
+      </div>
+      <p class="cmd-desc">创建新变更脚手架。创建变更文件夹，等待你用 <code>/opsx:continue</code> 或 <code>/opsx:ff</code> 生成产物。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:new [变更名] [--schema &lt;schema-name&gt;]</code>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <pre><code>You: /opsx:new add-dark-mode
+
+AI:  已创建 openspec/changes/add-dark-mode/
+     Schema: spec-driven
+
+     准备创建: proposal
+     使用 /opsx:continue 创建，或 /opsx:ff 创建所有产物。</code></pre>
+      </div>
+      <div class="tip-box">使用描述性名称：<code>add-feature</code>、<code>fix-bug</code>、<code>refactor-module</code>。避免使用 <code>update</code>、<code>changes</code>、<code>wip</code> 等泛称。</div>
+    </div>
+
+    <div class="cmd-card" id="cmd-continue">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:continue</code></div>
+        <div class="cmd-badge badge-expanded">扩展工作流</div>
+      </div>
+      <p class="cmd-desc">在依赖链中创建下一个产物。每次创建一个产物以实现增量进度。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:continue [变更名]</code>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <pre><code>You: /opsx:continue
+
+AI:  变更: add-dark-mode
+
+     产物状态:
+     ✓ proposal    (完成)
+     ◆ specs       (就绪)
+     ◆ design      (就绪)
+     ○ tasks       (阻塞 - 需要: specs)
+
+     正在创建 specs...
+     ✓ 已创建 openspec/changes/add-dark-mode/specs/ui/spec.md
+
+     现在可用: tasks
+     运行 /opsx:continue 创建下一个产物。</code></pre>
+      </div>
+      <div class="tip-box">当你想在继续之前审查每个产物时使用。可以在继续之前编辑已创建的产物。</div>
+    </div>
+
+    <div class="cmd-card" id="cmd-ff">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:ff</code></div>
+        <div class="cmd-badge badge-expanded">扩展工作流</div>
+      </div>
+      <p class="cmd-desc">快进产物创建。一次创建所有规划产物。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:ff [变更名]</code>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <pre><code>You: /opsx:ff add-dark-mode
+
+AI:  快进 add-dark-mode...
+
+     ✓ 创建 proposal.md
+     ✓ 创建 specs/ui/spec.md
+     ✓ 创建 design.md
+     ✓ 创建 tasks.md
+
+     所有规划产物完成！
+     准备好实现。运行 /opsx:apply 开始。</code></pre>
+      </div>
+      <div class="tip-box">当你对要构建的内容有清晰认识时使用。适合中小型功能。</div>
+    </div>
+
+    <div class="cmd-card" id="cmd-apply">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:apply</code></div>
+        <div class="cmd-badge badge-core">core profile</div>
+      </div>
+      <p class="cmd-desc">实现变更中的任务。逐步处理任务列表，编写代码并勾选完成项。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:apply [变更名]</code>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <pre><code>You: /opsx:apply
+
+AI:  实现 add-dark-mode...
+
+     读取 tasks.md:
+     - [ ] 1.1 创建 ThemeContext
+     - [ ] 1.2 添加 CSS 自定义属性
+     - [ ] 1.3 实现 localStorage 持久化
+
+     处理 1.1: 创建 ThemeContext...
+     [创建 src/context/ThemeContext.tsx]
+     ✓ 1.1 完成
+
+     处理 1.2: 添加 CSS 自定义属性...
+     [更新 src/styles/globals.css]
+     ✓ 1.2 完成
+     ...</code></pre>
+      </div>
+      <div class="tip-box">如果被打断可以恢复。可以通过指定变更名来并行处理多个变更。完成状态在 tasks.md 复选框中跟踪。</div>
+    </div>
+
+    <div class="cmd-card" id="cmd-verify">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:verify</code></div>
+        <div class="cmd-badge badge-expanded">扩展工作流</div>
+      </div>
+      <p class="cmd-desc">验证实现是否与变更产物匹配。从完整性、正确性和一致性三个维度检查。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:verify [变更名]</code>
+      </div>
+      <div class="table-wrapper">
+        <table class="doc-table">
+          <thead><tr><th>维度</th><th>验证内容</th></tr></thead>
+          <tbody>
+            <tr><td><strong>完整性</strong></td><td>所有任务完成、所有需求已实现、场景已覆盖</td></tr>
+            <tr><td><strong>正确性</strong></td><td>实现与规范意图匹配、边缘情况已处理</td></tr>
+            <tr><td><strong>一致性</strong></td><td>设计决策在代码中有体现、模式一致</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <pre><code>You: /opsx:verify
+
+AI:  验证 add-dark-mode...
+
+     完整性
+     ✓ tasks.md 中的所有 8 个任务都已完成
+     ✓ 规范中的所有需求都有对应代码
+     ⚠ 场景"系统偏好检测"没有测试覆盖
+
+     正确性
+     ✓ 实现与规范意图匹配
+     ✓ 场景中的边缘情况已处理
+
+     一致性
+     ✓ 设计决策在代码结构中有体现
+     ⚠ 设计提到"CSS 变量"但实现使用了 Tailwind 类
+
+     总结
+     关键问题: 0 | 警告: 2 | 可以归档: 是（有警告）</code></pre>
+      </div>
+    </div>
+
+    <div class="cmd-card" id="cmd-sync">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:sync</code></div>
+        <div class="cmd-badge badge-expanded">扩展工作流（可选）</div>
+      </div>
+      <p class="cmd-desc">将 Delta 规范从变更合并到主规范。归档时会提示同步，通常无需手动运行。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:sync [变更名]</code>
+      </div>
+      <div class="table-wrapper">
+        <table class="doc-table">
+          <thead><tr><th>场景</th><th>是否使用 sync？</th></tr></thead>
+          <tbody>
+            <tr><td>长期变更，归档前想先将规范同步到主分支</td><td>是</td></tr>
+            <tr><td>多个并行变更需要最新的基础规范</td><td>是</td></tr>
+            <tr><td>快速变更，直接归档</td><td>否（归档会处理）</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="cmd-card" id="cmd-archive">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:archive</code></div>
+        <div class="cmd-badge badge-core">core profile</div>
+      </div>
+      <p class="cmd-desc">归档已完成的变更。完成变更并将其移至归档文件夹。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:archive [变更名]</code>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <pre><code>You: /opsx:archive
+
+AI:  归档 add-dark-mode...
+
+     产物状态:
+     ✓ proposal.md 存在
+     ✓ specs/ 存在
+     ✓ design.md 存在
+     ✓ tasks.md 存在 (8/8 任务完成)
+
+     Delta 规范: 尚未同步
+     → 现在同步？(推荐)
+
+You: 是
+
+AI:  ✓ 已将规范同步到 openspec/specs/ui/spec.md
+     ✓ 已移至 openspec/changes/archive/2026-03-10-add-dark-mode/
+
+     变更归档成功。</code></pre>
+      </div>
+    </div>
+
+    <div class="cmd-card" id="cmd-bulk-archive">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:bulk-archive</code></div>
+        <div class="cmd-badge badge-expanded">扩展工作流</div>
+      </div>
+      <p class="cmd-desc">批量归档多个已完成的变更。自动处理变更之间的规范冲突。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:bulk-archive [变更名...]</code>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <pre><code>You: /opsx:bulk-archive
+
+AI:  找到 3 个已完成的变更:
+     - add-dark-mode (8/8 任务完成)
+     - fix-login-bug (3/3 任务完成)
+     - update-footer (2/2 任务完成)
+
+     检查规范冲突...
+     ⚠ add-dark-mode 和 update-footer 都触及 specs/ui/
+
+     检查代码库以解决...
+     两个变更都已实现。将按时间顺序合并:
+     1. add-dark-mode (1月20日创建)
+     2. update-footer (1月22日创建)
+
+     归档所有 3 个变更？
+
+You: 是
+
+AI:  ✓ 已归档 add-dark-mode
+     ✓ 已归档 fix-login-bug
+     ✓ 已归档 update-footer</code></pre>
+      </div>
+    </div>
+
+    <div class="cmd-card" id="cmd-onboard">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:onboard</code></div>
+        <div class="cmd-badge badge-expanded">扩展工作流</div>
+      </div>
+      <p class="cmd-desc">完整工作流的引导式入门教程，使用你的真实代码库进行交互式演示。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:onboard</code>
+      </div>
+      <div class="info-box">
+        <div class="info-icon">📋</div>
+        <div>
+          <strong>包含 11 个阶段</strong><br>
+          欢迎与代码库分析 → 发现改进机会 → 创建变更 → 编写提案 → 创建规范 → 编写设计 → 创建任务 → 实现任务 → 验证实现 → 归档变更 → 总结与后续步骤
+        </div>
+      </div>
+      <div class="tip-box">适合首次使用 OpenSpec 的用户。使用真实代码，不是玩具示例。完整完成约需 15-30 分钟。</div>
+    </div>
+
+  </div>
+
+  <!-- 不同 AI 工具的命令语法 -->
+  <div class="subsection">
+    <h3>不同 AI 工具的命令语法</h3>
+    <div class="table-wrapper">
+      <table class="doc-table">
+        <thead><tr><th>工具</th><th>语法示例</th></tr></thead>
+        <tbody>
+          <tr><td>Claude Code</td><td><code>/opsx:propose</code>、<code>/opsx:apply</code></td></tr>
+          <tr><td>Cursor</td><td><code>/opsx-propose</code>、<code>/opsx-apply</code></td></tr>
+          <tr><td>Windsurf</td><td><code>/opsx-propose</code>、<code>/opsx-apply</code></td></tr>
+          <tr><td>Copilot (IDE)</td><td><code>/opsx-propose</code>、<code>/opsx-apply</code></td></tr>
+          <tr><td>Trae</td><td><code>/openspec-propose</code>、<code>/openspec-apply-change</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

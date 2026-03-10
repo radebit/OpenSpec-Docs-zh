@@ -131,6 +131,16 @@ function toggleAccordion(header) {
 }
 
 // ==========================================
+// 更新历史展开/收起
+// ==========================================
+function toggleChangelog(btn) {
+  const details = btn.previousElementSibling;
+  const isOpen = details.classList.contains('expanded');
+  details.classList.toggle('expanded', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+  btn.querySelector('span').textContent = isOpen ? '展开详情' : '收起详情';
+}
+
 // 复制代码
 // ==========================================
 function copyCode(btn) {
@@ -329,3 +339,179 @@ document.querySelectorAll('.code-block code').forEach(block => {
 
 console.log('%cOpenSpec Docs', 'color: #6366f1; font-size: 20px; font-weight: bold;');
 console.log('%cAI-native spec-driven development system', 'color: #94a3b8');
+
+// ==========================================
+// 动态加载 sections/*.html
+// ==========================================
+(function loadSections() {
+  const sections = [
+    { containerId: 'section-getting-started', file: 'sections/getting-started.html' },
+    { containerId: 'section-concepts',        file: 'sections/concepts.html' },
+    { containerId: 'section-commands',        file: 'sections/commands.html' },
+    { containerId: 'section-cli',             file: 'sections/cli.html' },
+    { containerId: 'section-advanced',        file: 'sections/advanced.html' },
+  ];
+
+  let loadedCount = 0;
+
+  function onAllLoaded() {
+    // 重新执行需要 DOM 就绪的初始化
+    reinitAfterLoad();
+
+    // 所有 section 加载完成后，处理 URL hash 定位
+    scrollToHash();
+  }
+
+  function scrollToHash() {
+    const hash = window.location.hash;
+    if (!hash) return;
+    const id = hash.slice(1); // 去掉 #
+    const target = document.getElementById(id);
+    if (target) {
+      // 稍作延迟确保布局稳定
+      setTimeout(() => {
+        const offset = 72; // 顶部导航栏高度
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }, 80);
+    }
+  }
+
+  // 拦截页面内所有 #锚点 链接，防止默认跳转导致二次重载定位失准
+  function initAnchorInterceptor() {
+    document.addEventListener('click', function(e) {
+      const link = e.target.closest('a[href^="#"]');
+      if (!link) return;
+      const hash = link.getAttribute('href');
+      if (!hash || hash === '#') return;
+      const id = hash.slice(1);
+      const target = document.getElementById(id);
+      if (target) {
+        e.preventDefault();
+        history.pushState(null, '', hash);
+        const offset = 72;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  }
+
+  function reinitAfterLoad() {
+    // 重新绑定折叠面板
+    document.querySelectorAll('.accordion-header').forEach(header => {
+      header.onclick = function() { toggleAccordion(this); };
+    });
+
+    // 重新绑定 Tab 切换
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const tab = this.dataset.tab;
+        const container = this.closest('.install-tabs, .subsection') || this.parentElement.parentElement;
+        // 切换按钮状态
+        this.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        // 切换内容
+        const contents = container.querySelectorAll ? container.querySelectorAll('.tab-content') : [];
+        if (contents.length === 0) {
+          // 找兄弟节点
+          let el = this.parentElement.nextElementSibling;
+          while (el) {
+            if (el.classList.contains('tab-content')) {
+              el.classList.toggle('active', el.dataset.content === tab);
+            }
+            el = el.nextElementSibling;
+          }
+        } else {
+          contents.forEach(c => c.classList.toggle('active', c.dataset.content === tab));
+        }
+      });
+    });
+
+    // 重新初始化 IntersectionObserver（侧边栏高亮）
+    initSidebarObserver();
+
+    // 重新初始化代码高亮
+    initCodeHighlight();
+
+    // 重新初始化卡片动画
+    initCardAnimation();
+
+    // 初始化锚点拦截（只需绑定一次，使用事件委托）
+    initAnchorInterceptor();
+
+    console.log('%c✓ All sections loaded', 'color: #10b981');
+  }
+
+  function initSidebarObserver() {
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    if (!sidebarLinks.length) return;
+    const observerOptions = { rootMargin: '-20% 0px -70% 0px', threshold: 0 };
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          sidebarLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+          });
+        }
+      });
+    }, observerOptions);
+    document.querySelectorAll('[id]').forEach(el => {
+      if (el.tagName !== 'HTML' && el.tagName !== 'BODY') observer.observe(el);
+    });
+  }
+
+  function initCodeHighlight() {
+    document.querySelectorAll('.code-block pre code').forEach(block => {
+      let html = block.innerHTML;
+      html = html.replace(/(#[^\n]*)/g, '<span style="color:#64748b;font-style:italic">$1</span>');
+      html = html.replace(/\b(openspec\s+\w[\w-]*)/g, '<span style="color:#a5b4fc">$1</span>');
+      html = html.replace(/(\/opsx:[a-z-]+)/g, '<span style="color:#818cf8;font-weight:600">$1</span>');
+      html = html.replace(/(\/opsx-[a-z-]+)/g, '<span style="color:#818cf8;font-weight:600">$1</span>');
+      html = html.replace(/\b(npm|pnpm|yarn|bun|nix|export|cd)\b/g, '<span style="color:#c4b5fd">$1</span>');
+      html = html.replace(/(✓)/g, '<span style="color:#10b981">$1</span>');
+      html = html.replace(/(⚠)/g, '<span style="color:#f59e0b">$1</span>');
+      block.innerHTML = html;
+    });
+  }
+
+  function initCardAnimation() {
+    const cardObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          cardObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.feature-card, .phi-card, .cmd-card, .cli-cmd-block').forEach(card => {
+      cardObserver.observe(card);
+    });
+  }
+
+  sections.forEach(({ containerId, file }) => {
+    const container = document.getElementById(containerId);
+    if (!container) { loadedCount++; if (loadedCount === sections.length) onAllLoaded(); return; }
+
+    fetch(file)
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to load ${file}: ${res.status}`);
+        return res.text();
+      })
+      .then(html => {
+        container.innerHTML = html;
+        loadedCount++;
+        if (loadedCount === sections.length) onAllLoaded();
+      })
+      .catch(err => {
+        console.warn(`[OpenSpec Docs] ${err.message}`);
+        container.innerHTML = `<div style="padding:2rem;color:#f87171;text-align:center">
+          ⚠ 内容加载失败，请通过 HTTP 服务访问（如 python3 -m http.server）<br>
+          <small>${err.message}</small>
+        </div>`;
+        loadedCount++;
+        if (loadedCount === sections.length) onAllLoaded();
+      });
+  });
+})();
+

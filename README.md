@@ -23,16 +23,25 @@
 
 ```
 OpenSpec-Docs-zh/
-├── index.html          # 主文档页面（单页应用）
-├── styles.css          # AI 科技风格样式
-├── script.js           # 交互脚本（粒子背景、选项卡、锚点高亮等）
-├── assets/             # 图片资源
+├── index.html              # 主入口（约 450 行，精简骨架）
+├── styles.css              # AI 科技风格样式
+├── script.js               # 交互脚本（粒子背景、动态加载、侧边栏等）
+├── sections/               # 按章节拆分的内容文件（动态加载）
+│   ├── getting-started.html # 安装指南 + 快速开始
+│   ├── concepts.html       # 核心概念（规范/变更/产物/Delta/Schema）
+│   ├── commands.html       # OPSX Slash 命令参考
+│   ├── cli.html            # CLI 终端命令参考
+│   └── advanced.html       # 工作流/定制化/支持工具/多语言/贡献/关于
+├── assets/                 # 图片资源
+│   ├── home-page.jpg       # 页面预览截图
 │   ├── openspec_bg.png
 │   ├── openspec_dashboard.png
 │   ├── openspec_pixel_dark.svg
 │   └── openspec_pixel_light.svg
-└── README.md           # 本文件
+└── README.md               # 本文件
 ```
+
+> **注意**：`sections/` 目录下的文件通过 `fetch` 动态加载，需通过 HTTP/HTTPS 服务访问（直接双击打开 HTML 文件会因浏览器跨域限制导致内容无法加载）。
 
 ---
 
