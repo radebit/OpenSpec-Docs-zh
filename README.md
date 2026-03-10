@@ -111,7 +111,6 @@ open index.html
 - **文档勘误**：发现翻译错误或表述不准确，欢迎提 [Issue](https://github.com/radebit/OpenSpec-Docs-zh/issues)
 - **内容补充**：有实战经验、使用技巧或示例想分享，欢迎提 PR
 - **术语建议**：对某个术语的本地化译法有更好建议，欢迎在 Issue 中讨论
-- **直接联系**：[rade@radebit.com](mailto:rade@radebit.com)
 
 ---
 
