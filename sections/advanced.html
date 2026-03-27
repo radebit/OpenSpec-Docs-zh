@@ -263,7 +263,7 @@ openspec schema fork spec-driven with-review
 
   <div class="subsection">
     <h3>非交互式安装</h3>
-    <p>用于 CI/CD 或脚本化安装：</p>
+    <p>用于 CI/CD 或脚本化安装，可使用 <code>--tools</code> 和 <code>--profile</code> 参数：</p>
     <div class="code-block">
       <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
       <pre><code># 配置特定工具
@@ -273,7 +273,10 @@ openspec init --tools claude,cursor
 openspec init --tools all
 
 # 跳过工具配置
-openspec init --tools none</code></pre>
+openspec init --tools none
+
+# 指定 profile 覆盖
+openspec init --profile core</code></pre>
     </div>
   </div>
 

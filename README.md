@@ -31,7 +31,9 @@ OpenSpec-Docs-zh/
 │   ├── concepts.html       # 核心概念（规范/变更/产物/Delta/Schema）
 │   ├── commands.html       # OPSX Slash 命令参考
 │   ├── cli.html            # CLI 终端命令参考
-│   └── advanced.html       # 工作流/定制化/支持工具/多语言/贡献/关于
+│   ├── advanced.html       # 工作流/定制化/支持工具/多语言/贡献
+│   ├── practice-guide.html # 实战指南（深入理解/最佳实践/从零开始/FAQ）
+│   └── about.html          # 关于文档 + 更新历史
 ├── assets/                 # 图片资源
 │   ├── home-page.jpg       # 页面预览截图
 │   ├── openspec_bg.png
@@ -61,12 +63,15 @@ OpenSpec-Docs-zh/
 | 自定义配置 | `docs/customization.md` |
 | 支持的 AI 工具（24款） | `docs/supported-tools.md` |
 | 多语言支持 | `docs/multi-language.md` |
+| 实战指南 | 社区补充内容 |
+| 关于文档 & 更新历史 | 社区维护 |
 
 ---
 
 ## 与官方文档的关系
 
 - 本项目基于官方英文文档翻译整理，**为独立社区项目，非官方出品**
+- 当前同步至官方版本：**v1.2.0**（包含 profile 工作流、工具引用、status 输出等更新）
 - 部分技术术语进行了本地化处理，例如：
   - `Source of Truth` → 权威基准
   - `Brownfield Development` → 存量项目开发
