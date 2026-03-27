@@ -141,6 +141,24 @@ function toggleChangelog(btn) {
   btn.querySelector('span').textContent = isOpen ? '展开详情' : '收起详情';
 }
 
+// ==========================================
+// FAQ 折叠面板
+// ==========================================
+function toggleFaq(questionEl) {
+  const faqItem = questionEl.closest('.faq-item');
+  const isOpen = faqItem.classList.contains('open');
+  
+  // 可选：关闭其他打开的 FAQ
+  // const faqList = faqItem.closest('.faq-list');
+  // if (faqList) {
+  //   faqList.querySelectorAll('.faq-item.open').forEach(item => {
+  //     if (item !== faqItem) item.classList.remove('open');
+  //   });
+  // }
+  
+  faqItem.classList.toggle('open', !isOpen);
+}
+
 // 复制代码
 // ==========================================
 function copyCode(btn) {
@@ -350,6 +368,8 @@ console.log('%cAI-native spec-driven development system', 'color: #94a3b8');
     { containerId: 'section-commands',        file: 'sections/commands.html' },
     { containerId: 'section-cli',             file: 'sections/cli.html' },
     { containerId: 'section-advanced',        file: 'sections/advanced.html' },
+    { containerId: 'section-practice-guide',  file: 'sections/practice-guide.html' },
+    { containerId: 'section-about',           file: 'sections/about.html' },
   ];
 
   let loadedCount = 0;

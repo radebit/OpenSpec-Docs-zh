@@ -1,0 +1,988 @@
+<!-- ======================== OpenSpec 上手实践指南 ======================== -->
+<section class="content-section" id="practice-guide">
+  <div class="section-header">
+    <span class="section-tag">实战指南</span>
+    <h2>OpenSpec 上手实践指南</h2>
+    <p>从零开始掌握规范驱动开发，构建高质量 AI 协作工作流</p>
+  </div>
+
+  <!-- 导读 -->
+  <div class="info-box info-tip">
+    <div class="info-icon">📚</div>
+    <div>
+      <strong>本指南适合谁？</strong><br>
+      希望系统学习 OpenSpec 的开发者，包括：想要提升 AI 编码效率的个人开发者、希望规范化 AI 协作流程的团队 Leader、以及对规范驱动开发（Spec-Driven Development）感兴趣的技术人员。
+    </div>
+  </div>
+</section>
+
+<!-- ======================== Part 1: 深入理解 OpenSpec ======================== -->
+<section class="content-section" id="deep-understanding">
+  <div class="section-header">
+    <span class="section-tag">Part 1</span>
+    <h2>深入理解 OpenSpec</h2>
+    <p>不只是工具，更是一种全新的 AI 协作范式</p>
+  </div>
+
+  <div class="subsection" id="what-is-openspec">
+    <h3>1.1 OpenSpec 是什么？</h3>
+    <p>OpenSpec 是一个<strong>轻量级规范驱动开发框架</strong>，专为 AI 编码助手时代设计。它通过建立「人机对齐」的规范层，让开发者和 AI 在编写代码之前先达成共识。</p>
+    
+    <div class="highlight-box">
+      <div class="highlight-title">核心定位</div>
+      <p>OpenSpec 不是取代 AI 编码助手，而是<strong>增强它们的可控性和可预测性</strong>。它让 AI 从「被动响应聊天历史」转变为「主动遵循结构化规范」。</p>
+    </div>
+
+    <div class="comparison-table">
+      <div class="table-wrapper">
+        <table class="doc-table">
+          <thead><tr><th>维度</th><th>传统 AI 编码</th><th>OpenSpec 增强</th></tr></thead>
+          <tbody>
+            <tr><td><strong>需求来源</strong></td><td>聊天历史（易丢失、难追溯）</td><td>结构化规范文件（可版本控制）</td></tr>
+            <tr><td><strong>实现过程</strong></td><td>一次性生成，难以迭代</td><td>任务驱动，可暂停、可恢复</td></tr>
+            <tr><td><strong>变更管理</strong></td><td>无记录，难以审计</td><td>Delta 机制，完整审计轨迹</td></tr>
+            <tr><td><strong>团队协作</strong></td><td>依赖个人 prompt 技巧</td><td>标准化工作流，经验可复用</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="why-openspec">
+    <h3>1.2 为什么需要 OpenSpec？</h3>
+    <p>AI 编码助手（如 Claude Code、Cursor、Copilot）的普及带来了三个核心痛点：</p>
+    
+    <div class="pain-points">
+      <div class="pain-card">
+        <div class="pain-icon">😵</div>
+        <h4>痛点一：AI 幻觉与偏离</h4>
+        <p>需求只存在于聊天中，AI 容易「忘记」上下文或产生幻觉。长对话后，AI 可能偏离最初意图，实现出完全不符合预期的功能。</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">🔄</div>
+        <h4>痛点二：迭代成本高</h4>
+        <p>没有结构化记录，每次修改都需要重新描述上下文。复杂功能的迭代开发变成「从头再来」，效率极低。</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">👥</div>
+        <h4>痛点三：团队协作难</h4>
+        <p>个人 prompt 技巧无法复用，团队成员的 AI 协作质量参差不齐。缺乏统一的工作流程和质量标准。</p>
+      </div>
+    </div>
+
+    <div class="solution-box">
+      <div class="solution-title">OpenSpec 的解决方案</div>
+      <div class="solution-points">
+        <div class="sp-item">
+          <span class="sp-num">01</span>
+          <div>
+            <strong>规范先行</strong>
+            <p>在编码前通过 Proposal 明确意图、通过 Specs 定义行为契约、通过 Design 确定技术方案</p>
+          </div>
+        </div>
+        <div class="sp-item">
+          <span class="sp-num">02</span>
+          <div>
+            <strong>任务驱动</strong>
+            <p>Tasks 文件作为实现清单，AI 按任务逐项执行，可随时暂停和恢复，进度可追踪</p>
+          </div>
+        </div>
+        <div class="sp-item">
+          <span class="sp-num">03</span>
+          <div>
+            <strong>Delta 机制</strong>
+            <p>变更以增量方式记录（ADDED/MODIFIED/REMOVED），完美适配存量项目改造场景</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="core-architecture">
+    <h3>1.3 核心架构解析</h3>
+    <p>理解 OpenSpec 的架构设计，是高效使用它的基础。</p>
+
+    <div class="arch-deep">
+      <div class="code-block">
+        <div class="code-header"><span>OpenSpec 目录结构</span></div>
+        <pre><code>openspec/
+├── specs/                    # 【权威基准】系统当前行为的完整描述
+│   ├── auth/
+│   │   └── spec.md           # 认证模块规范
+│   ├── payments/
+│   │   └── spec.md           # 支付模块规范
+│   └── ui/
+│       └── spec.md           # UI 行为规范
+│
+├── changes/                  # 【变更工作区】正在进行的修改
+│   ├── add-dark-mode/        # 变更文件夹（每个变更独立）
+│   │   ├── proposal.md       # 提案：为什么做、做什么
+│   │   ├── specs/            # Delta 规范：正在变化的部分
+│   │   │   └── ui/
+│   │   │       └── spec.md   # ADDED/MODIFIED/REMOVED 格式
+│   │   ├── design.md         # 设计：如何实现
+│   │   ├── tasks.md          # 任务：具体实现步骤
+│   │   └── .openspec.yaml    # 变更元数据
+│   │
+│   └── archive/              # 【历史归档】已完成的变更
+│       └── 2025-01-24-add-auth/
+│
+├── schemas/                  # 【可选】自定义工作流 Schema
+│   └── my-workflow/
+│       ├── schema.yaml
+│       └── templates/
+│
+└── config.yaml               # 项目配置（上下文、规则等）</code></pre>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-icon">💡</div>
+      <div>
+        <strong>架构设计哲学</strong><br>
+        <code>specs/</code> 与 <code>changes/</code> 的分离是 OpenSpec 的核心设计。这确保了：① 主规范始终保持稳定 ② 多个变更可并行进行而不冲突 ③ 归档时 Delta 能干净合并回主规范
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="artifact-system">
+    <h3>1.4 产物（Artifact）体系详解</h3>
+    <p>OpenSpec 的产物体系遵循「渐进式明确」原则，每个产物为下一个提供上下文。</p>
+
+    <div class="artifact-detail-grid">
+      <div class="artifact-detail-card">
+        <div class="adc-header">
+          <span class="adc-icon">📋</span>
+          <h4>Proposal（提案）</h4>
+        </div>
+        <div class="adc-body">
+          <p><strong>职责：</strong>回答「为什么做」和「做什么」</p>
+          <ul>
+            <li>Intent（意图）：解决什么问题</li>
+            <li>Scope（范围）：包含/不包含什么</li>
+            <li>Approach（方案）：高层次的实现思路</li>
+          </ul>
+          <div class="adc-tip">💡 Proposal 是与 AI 对齐的第一步，确保你们对「做什么」有共识</div>
+        </div>
+      </div>
+
+      <div class="artifact-detail-card">
+        <div class="adc-header">
+          <span class="adc-icon">📐</span>
+          <h4>Specs（规范）</h4>
+        </div>
+        <div class="adc-body">
+          <p><strong>职责：</strong>定义系统的行为契约</p>
+          <ul>
+            <li>Requirements：系统必须具备的行为</li>
+            <li>Scenarios：可验证的具体场景（Given/When/Then）</li>
+            <li>Delta 格式：ADDED / MODIFIED / REMOVED</li>
+          </ul>
+          <div class="adc-tip">💡 Specs 是行为契约，不是实现细节。关注「系统做什么」而非「代码怎么写」</div>
+        </div>
+      </div>
+
+      <div class="artifact-detail-card">
+        <div class="adc-header">
+          <span class="adc-icon">🏗️</span>
+          <h4>Design（设计）</h4>
+        </div>
+        <div class="adc-body">
+          <p><strong>职责：</strong>回答「如何实现」</p>
+          <ul>
+            <li>Technical Approach：技术方案概述</li>
+            <li>Architecture Decisions：关键决策及理由</li>
+            <li>Data Flow：数据流和组件交互</li>
+          </ul>
+          <div class="adc-tip">💡 Design 记录架构决策的「为什么」，方便后续维护和回溯</div>
+        </div>
+      </div>
+
+      <div class="artifact-detail-card">
+        <div class="adc-header">
+          <span class="adc-icon">✅</span>
+          <h4>Tasks（任务）</h4>
+        </div>
+        <div class="adc-body">
+          <p><strong>职责：</strong>具体的实现步骤清单</p>
+          <ul>
+            <li>分组编号：按模块分组，层级编号（1.1, 1.2...）</li>
+            <li>复选框：<code>- [ ]</code> 未完成 / <code>- [x]</code> 已完成</li>
+            <li>可追踪：AI 按任务执行，进度实时可见</li>
+          </ul>
+          <div class="adc-tip">💡 Tasks 是 AI 实现代码的「导航图」，粒度要适中（一个任务 ≈ 一次提交）</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="artifact-flow-diagram">
+      <div class="afd-title">产物依赖关系图</div>
+      <div class="afd-content">
+        <div class="afd-node afd-root">proposal</div>
+        <div class="afd-arrows">
+          <div class="afd-arrow">↙</div>
+          <div class="afd-arrow">↘</div>
+        </div>
+        <div class="afd-row">
+          <div class="afd-node">specs</div>
+          <div class="afd-node">design</div>
+        </div>
+        <div class="afd-arrows">
+          <div class="afd-arrow">↘</div>
+          <div class="afd-arrow">↙</div>
+        </div>
+        <div class="afd-node afd-leaf">tasks</div>
+        <div class="afd-arrow">↓</div>
+        <div class="afd-node afd-impl">implement（/opsx:apply）</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== Part 2: 最佳实践 ======================== -->
+<section class="content-section" id="best-practices">
+  <div class="section-header">
+    <span class="section-tag">Part 2</span>
+    <h2>OpenSpec 最佳实践</h2>
+    <p>从实战经验中提炼的高效使用模式</p>
+  </div>
+
+  <div class="subsection" id="practice-workflow">
+    <h3>2.1 工作流选择策略</h3>
+    <p>OpenSpec 提供两种主要工作流，选择合适的工作流能显著提升效率。</p>
+
+    <div class="workflow-comparison">
+      <div class="wfc-card wfc-core">
+        <div class="wfc-header">
+          <span class="wfc-badge">推荐</span>
+          <h4>Core 快速路径</h4>
+        </div>
+        <div class="wfc-flow">
+          <code>/opsx:propose</code> → <code>/opsx:apply</code> → <code>/opsx:archive</code>
+        </div>
+        <div class="wfc-body">
+          <p><strong>适用场景：</strong></p>
+          <ul>
+            <li>需求明确的中小型功能</li>
+            <li>Bug 修复和小型优化</li>
+            <li>时间紧迫需要快速交付</li>
+            <li>个人项目或快速原型</li>
+          </ul>
+          <p><strong>优势：</strong>一条命令生成所有产物，最小化仪式感</p>
+        </div>
+      </div>
+
+      <div class="wfc-card wfc-expanded">
+        <div class="wfc-header">
+          <span class="wfc-badge wfc-badge-alt">精细控制</span>
+          <h4>Expanded 扩展路径</h4>
+        </div>
+        <div class="wfc-flow">
+          <code>/opsx:new</code> → <code>/opsx:continue</code> → <code>/opsx:apply</code> → <code>/opsx:verify</code> → <code>/opsx:archive</code>
+        </div>
+        <div class="wfc-body">
+          <p><strong>适用场景：</strong></p>
+          <ul>
+            <li>复杂功能开发（跨模块、跨团队）</li>
+            <li>需求不明确，需要探索</li>
+            <li>需要逐步审查每个产物</li>
+            <li>团队协作项目</li>
+          </ul>
+          <p><strong>优势：</strong>每个产物可单独创建和审查，控制粒度更细</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="decision-tree">
+      <div class="dt-title">工作流选择决策树</div>
+      <div class="code-block">
+        <div class="code-header"><span>选择指南</span></div>
+        <pre><code>你能在 30 秒内描述清楚「做什么」吗？
+├── 是 → 需求明确
+│   ├── 功能复杂度高（>10 个任务）？
+│   │   ├── 是 → 使用 Expanded（/opsx:new + /opsx:ff）
+│   │   └── 否 → 使用 Core（/opsx:propose）
+│   └── 需要团队审查？
+│       ├── 是 → 使用 Expanded（/opsx:continue 逐步审查）
+│       └── 否 → 使用 Core（/opsx:propose）
+│
+└── 否 → 需求不明确
+    └── 先使用 /opsx:explore 探索，然后选择合适路径</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="practice-naming">
+    <h3>2.2 变更命名规范</h3>
+    <p>好的命名让 <code>openspec list</code> 一目了然，也方便日后追溯。</p>
+
+    <div class="naming-guide">
+      <div class="table-wrapper">
+        <table class="doc-table">
+          <thead><tr><th>模式</th><th>示例</th><th>适用场景</th></tr></thead>
+          <tbody>
+            <tr><td><code>add-&lt;feature&gt;</code></td><td><code>add-dark-mode</code>、<code>add-export-csv</code></td><td>新增功能</td></tr>
+            <tr><td><code>fix-&lt;issue&gt;</code></td><td><code>fix-login-redirect</code>、<code>fix-memory-leak</code></td><td>Bug 修复</td></tr>
+            <tr><td><code>refactor-&lt;module&gt;</code></td><td><code>refactor-auth-service</code></td><td>代码重构</td></tr>
+            <tr><td><code>optimize-&lt;target&gt;</code></td><td><code>optimize-query-performance</code></td><td>性能优化</td></tr>
+            <tr><td><code>update-&lt;component&gt;</code></td><td><code>update-react-18</code></td><td>依赖更新</td></tr>
+            <tr><td><code>implement-&lt;spec&gt;</code></td><td><code>implement-2fa</code></td><td>实现某个规范</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="tip-box">
+        <strong>命名原则：</strong>动词-名词格式，kebab-case 连字符分隔，具体描述意图。避免使用 <code>feature-1</code>、<code>update</code>、<code>wip</code> 等模糊命名。
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="practice-specs-writing">
+    <h3>2.3 高质量规范编写</h3>
+    <p>规范是 OpenSpec 的核心，写好规范是提高 AI 实现质量的关键。</p>
+
+    <div class="spec-guide">
+      <h4>✅ 好的规范示例</h4>
+      <div class="code-block">
+        <div class="code-header"><span>specs/auth/spec.md</span></div>
+        <pre><code># Auth 规范
+
+## 目的
+用户身份验证和会话管理。
+
+## 需求
+
+### 需求：JWT 令牌认证
+系统 SHALL 在登录成功时颁发 JWT 令牌。
+
+#### 场景：有效凭据登录
+- GIVEN 用户具有有效的邮箱和密码
+- WHEN 用户提交登录表单
+- THEN 系统返回包含 accessToken 和 refreshToken 的响应
+- AND accessToken 有效期为 15 分钟
+- AND refreshToken 有效期为 7 天
+- AND 用户被重定向到 dashboard 页面
+
+#### 场景：无效凭据登录
+- GIVEN 用户提交无效的邮箱或密码
+- WHEN 用户提交登录表单
+- THEN 系统返回 401 状态码
+- AND 响应包含 "Invalid credentials" 错误信息
+- AND 不颁发任何令牌</code></pre>
+      </div>
+
+      <h4>❌ 避免的写法</h4>
+      <div class="code-block bad-example">
+        <div class="code-header"><span>反例：过于实现细节</span></div>
+        <pre><code># 不好的规范 - 包含实现细节
+
+### 需求：登录功能
+使用 bcrypt 比较密码，用 jsonwebtoken 库生成 JWT。
+在 UserController.login() 方法中实现，
+调用 AuthService.validatePassword() 验证...</code></pre>
+      </div>
+      <div class="info-box info-warning">
+        <div class="info-icon">⚠️</div>
+        <div>
+          <strong>规范 ≠ 实现计划</strong><br>
+          规范描述「系统应该做什么」（行为契约），不是「代码怎么写」（实现细节）。内部类名、库选择、代码结构应该放在 design.md 中。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="practice-delta">
+    <h3>2.4 Delta 规范高级用法</h3>
+    <p>Delta 机制是 OpenSpec 适配「存量项目改造」的核心能力。</p>
+
+    <div class="delta-patterns">
+      <div class="dp-card">
+        <h4>ADDED：新增需求</h4>
+        <div class="code-block">
+          <div class="code-header"><span>示例</span></div>
+          <pre><code>## ADDED Requirements
+
+### 需求：双因素认证
+系统 MUST 支持基于 TOTP 的双因素认证。
+
+#### 场景：启用 2FA
+- GIVEN 用户未启用 2FA
+- WHEN 用户在设置页面启用 2FA
+- THEN 显示二维码供 Authenticator App 扫描
+- AND 用户需输入验证码确认激活</code></pre>
+        </div>
+        <p class="dp-effect">归档效果：追加到主规范末尾</p>
+      </div>
+
+      <div class="dp-card">
+        <h4>MODIFIED：修改现有需求</h4>
+        <div class="code-block">
+          <div class="code-header"><span>示例</span></div>
+          <pre><code>## MODIFIED Requirements
+
+### 需求：会话过期时间
+系统 MUST 在 15 分钟不活动后使会话过期。
+（之前：30 分钟）
+
+#### 场景：空闲超时
+- GIVEN 已认证的会话
+- WHEN 15 分钟内无任何操作
+- THEN 会话被作废
+- AND 用户需重新登录</code></pre>
+        </div>
+        <p class="dp-effect">归档效果：替换主规范中同名需求</p>
+      </div>
+
+      <div class="dp-card">
+        <h4>REMOVED：删除需求</h4>
+        <div class="code-block">
+          <div class="code-header"><span>示例</span></div>
+          <pre><code>## REMOVED Requirements
+
+### 需求：记住我功能
+（因支持 2FA 而废弃。用户应在每次会话重新认证。）</code></pre>
+        </div>
+        <p class="dp-effect">归档效果：从主规范中删除该需求</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="practice-config">
+    <h3>2.5 项目配置最佳实践</h3>
+    <p>合理的 <code>config.yaml</code> 配置能显著提升 AI 产物质量。</p>
+
+    <div class="code-block">
+      <div class="code-header"><span>openspec/config.yaml — 推荐配置模板</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>schema: spec-driven
+
+# 项目上下文 - AI 生成产物时会参考这些信息
+context: |
+  # 项目概述
+  项目名称：MyApp
+  项目类型：Web 应用
+  
+  # 技术栈
+  前端：React 18 + TypeScript + Tailwind CSS
+  后端：Node.js + Express + PostgreSQL
+  测试：Jest + React Testing Library
+  
+  # 代码规范
+  - 使用 ESLint + Prettier 进行代码格式化
+  - 组件使用函数式组件 + Hooks
+  - API 遵循 RESTful 设计
+  - 所有公共 API 需保持向后兼容
+  
+  # 分支策略
+  - main: 生产分支
+  - develop: 开发分支
+  - feature/*: 功能分支
+
+# 每产物规则 - 针对特定产物的额外指导
+rules:
+  proposal:
+    - 必须包含回滚计划
+    - 说明对现有功能的影响
+    - 列出需要协调的团队
+  specs:
+    - 使用 Given/When/Then 格式编写场景
+    - 优先引用现有模式，避免重复发明
+    - 包含边界条件和异常场景
+  design:
+    - 说明关键技术决策的理由
+    - 列出受影响的文件和模块
+    - 考虑性能和安全影响
+  tasks:
+    - 任务粒度适中（每个任务约 1-2 小时工作量）
+    - 按模块分组，使用层级编号
+    - 包含必要的测试任务</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== Part 3: 从零开始实践 ======================== -->
+<section class="content-section" id="hands-on">
+  <div class="section-header">
+    <span class="section-tag">Part 3</span>
+    <h2>从零开始实践</h2>
+    <p>通过完整案例掌握 OpenSpec 工作流</p>
+  </div>
+
+  <div class="subsection" id="hands-on-setup">
+    <h3>3.1 环境准备</h3>
+    
+    <div class="steps-container">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>安装 OpenSpec</h4>
+          <div class="code-block">
+            <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+            <pre><code># 使用 npm 全局安装（推荐）
+npm install -g @fission-ai/openspec@latest
+
+# 验证安装
+openspec --version</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>初始化项目</h4>
+          <div class="code-block">
+            <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+            <pre><code># 进入项目目录
+cd your-project
+
+# 交互式初始化（推荐）
+openspec init
+
+# 或非交互式，指定 AI 工具
+openspec init --tools claude,cursor</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>配置项目上下文（可选但推荐）</h4>
+          <div class="code-block">
+            <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+            <pre><code># 编辑配置文件，添加项目上下文
+# 参考上一节的配置模板
+vim openspec/config.yaml</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="hands-on-case">
+    <h3>3.2 完整案例：为应用添加暗色模式</h3>
+    <p>让我们通过一个完整案例，体验 OpenSpec 的工作流。</p>
+
+    <div class="case-study">
+      <div class="case-phase">
+        <div class="case-phase-header">
+          <span class="phase-num">Phase 1</span>
+          <h4>启动变更</h4>
+        </div>
+        <div class="case-phase-body">
+          <p>在 AI 编码助手的对话窗口中输入：</p>
+          <div class="code-block">
+            <div class="code-header"><span>AI 对话</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+            <pre><code>/opsx:propose add-dark-mode
+
+我想为应用添加暗色模式功能，包括：
+1. 在设置页面添加主题切换开关
+2. 支持检测系统偏好（跟随系统）
+3. 用户选择持久化到 localStorage
+4. 所有页面即时切换，无需刷新</code></pre>
+          </div>
+          <div class="case-result">
+            <p><strong>AI 将创建：</strong></p>
+            <ul>
+              <li><code>openspec/changes/add-dark-mode/proposal.md</code> — 提案文档</li>
+              <li><code>openspec/changes/add-dark-mode/specs/ui/spec.md</code> — Delta 规范</li>
+              <li><code>openspec/changes/add-dark-mode/design.md</code> — 设计文档</li>
+              <li><code>openspec/changes/add-dark-mode/tasks.md</code> — 任务清单</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="case-phase">
+        <div class="case-phase-header">
+          <span class="phase-num">Phase 2</span>
+          <h4>审查产物（重要！）</h4>
+        </div>
+        <div class="case-phase-body">
+          <p>在执行实现前，花几分钟审查 AI 生成的产物：</p>
+          <div class="code-block">
+            <div class="code-header"><span>bash — 查看产物</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+            <pre><code># 列出当前变更
+openspec list
+
+# 查看变更详情
+openspec show add-dark-mode
+
+# 或使用交互式仪表板
+openspec view</code></pre>
+          </div>
+          <div class="review-checklist">
+            <h5>审查清单：</h5>
+            <ul>
+              <li>☐ Proposal：意图和范围是否准确？</li>
+              <li>☐ Specs：场景是否覆盖了主要用例和边界情况？</li>
+              <li>☐ Design：技术方案是否合理？</li>
+              <li>☐ Tasks：任务拆分是否合理？粒度是否适中？</li>
+            </ul>
+          </div>
+          <div class="tip-box">
+            <strong>Pro Tip：</strong>如果发现产物有问题，直接告诉 AI 修改即可，如：「请把 tasks.md 中的第 2 组任务拆分得更细一些」
+          </div>
+        </div>
+      </div>
+
+      <div class="case-phase">
+        <div class="case-phase-header">
+          <span class="phase-num">Phase 3</span>
+          <h4>实现代码</h4>
+        </div>
+        <div class="case-phase-body">
+          <div class="code-block">
+            <div class="code-header"><span>AI 对话</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+            <pre><code>/opsx:apply</code></pre>
+          </div>
+          <p>AI 将按照 tasks.md 中的清单逐项实现：</p>
+          <div class="apply-progress">
+            <div class="ap-item ap-done">✓ 1.1 创建 ThemeContext</div>
+            <div class="ap-item ap-done">✓ 1.2 添加 CSS 自定义属性</div>
+            <div class="ap-item ap-done">✓ 1.3 实现 localStorage 持久化</div>
+            <div class="ap-item ap-current">→ 2.1 创建 ThemeToggle 组件（进行中）</div>
+            <div class="ap-item ap-pending">○ 2.2 添加到设置页面</div>
+            <div class="ap-item ap-pending">○ 3.1 定义暗色调色板</div>
+          </div>
+          <div class="info-box">
+            <div class="info-icon">💡</div>
+            <div>
+              <strong>可以随时暂停</strong><br>
+              实现过程中如果需要暂停（下班、开会等），直接停止即可。下次继续时，AI 会从未完成的任务继续执行。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="case-phase">
+        <div class="case-phase-header">
+          <span class="phase-num">Phase 4</span>
+          <h4>验证实现（推荐）</h4>
+        </div>
+        <div class="case-phase-body">
+          <div class="code-block">
+            <div class="code-header"><span>AI 对话</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+            <pre><code>/opsx:verify</code></pre>
+          </div>
+          <p>AI 将检查实现是否与产物一致：</p>
+          <ul>
+            <li><strong>Completeness</strong>：所有任务是否完成？所有需求是否实现？</li>
+            <li><strong>Correctness</strong>：实现是否符合规范意图？</li>
+            <li><strong>Coherence</strong>：代码是否反映了设计决策？</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="case-phase">
+        <div class="case-phase-header">
+          <span class="phase-num">Phase 5</span>
+          <h4>归档变更</h4>
+        </div>
+        <div class="case-phase-body">
+          <div class="code-block">
+            <div class="code-header"><span>AI 对话</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+            <pre><code>/opsx:archive</code></pre>
+          </div>
+          <p>归档过程会：</p>
+          <ol>
+            <li>将 Delta 规范合并到 <code>openspec/specs/ui/spec.md</code></li>
+            <li>将变更文件夹移动到 <code>openspec/changes/archive/2025-xx-xx-add-dark-mode/</code></li>
+            <li>保留完整的产物作为审计轨迹</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection" id="hands-on-cli">
+    <h3>3.3 CLI 常用命令速查</h3>
+    
+    <div class="cli-cheatsheet">
+      <div class="table-wrapper">
+        <table class="doc-table">
+          <thead><tr><th>命令</th><th>用途</th><th>示例</th></tr></thead>
+          <tbody>
+            <tr><td><code>openspec list</code></td><td>列出所有活动变更</td><td><code>openspec list --json</code></td></tr>
+            <tr><td><code>openspec show</code></td><td>查看变更/规范详情</td><td><code>openspec show add-dark-mode</code></td></tr>
+            <tr><td><code>openspec view</code></td><td>交互式仪表板</td><td><code>openspec view</code></td></tr>
+            <tr><td><code>openspec validate</code></td><td>验证产物格式</td><td><code>openspec validate --all</code></td></tr>
+            <tr><td><code>openspec status</code></td><td>查看产物完成状态</td><td><code>openspec status --change add-dark-mode</code></td></tr>
+            <tr><td><code>openspec archive</code></td><td>归档变更（CLI 方式）</td><td><code>openspec archive add-dark-mode -y</code></td></tr>
+            <tr><td><code>openspec update</code></td><td>更新 AI 工具配置</td><td><code>openspec update</code></td></tr>
+            <tr><td><code>openspec config profile</code></td><td>配置工作流 profile</td><td><code>openspec config profile core</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== Part 4: FAQ ======================== -->
+<section class="content-section" id="faq">
+  <div class="section-header">
+    <span class="section-tag">Part 4</span>
+    <h2>常见问题解答（FAQ）</h2>
+    <p>实战中常见问题的解决方案</p>
+  </div>
+
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <span class="faq-icon">Q</span>
+        <span class="faq-text">AI 生成的产物质量不高怎么办？</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p><strong>解决方案：</strong></p>
+        <ol>
+          <li><strong>完善项目配置</strong>：在 <code>openspec/config.yaml</code> 中添加详细的项目上下文（技术栈、代码规范、架构约定等），AI 会参考这些信息</li>
+          <li><strong>添加产物规则</strong>：为特定产物添加 rules，如要求 specs 必须使用 Given/When/Then 格式</li>
+          <li><strong>使用高质量模型</strong>：OpenSpec 官方推荐使用 Claude Opus 4.5 或 GPT 5.2 等高推理能力模型</li>
+          <li><strong>提供更多上下文</strong>：在 <code>/opsx:propose</code> 时提供更详细的描述</li>
+        </ol>
+        <div class="code-block">
+          <div class="code-header"><span>示例：增强的提案描述</span></div>
+          <pre><code>/opsx:propose add-dark-mode
+
+## 背景
+- 用户调研显示 60% 用户希望有暗色模式
+- 竞品 A 和 B 都已支持暗色模式
+
+## 详细需求
+1. 主题切换：设置页面添加 Toggle，支持「浅色/深色/跟随系统」三种选项
+2. 即时切换：切换后所有页面立即生效，无需刷新
+3. 持久化：使用 localStorage 存储，刷新后保持选择
+4. 系统适配：首次访问时检测系统偏好
+
+## 技术约束
+- 使用 CSS Custom Properties 实现
+- 使用 React Context 管理状态
+- 不引入额外的 CSS-in-JS 库</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <span class="faq-icon">Q</span>
+        <span class="faq-text">AI 工具无法识别 /opsx 命令怎么办？</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p><strong>可能原因及解决方案：</strong></p>
+        <ol>
+          <li><strong>未初始化</strong>：运行 <code>openspec init</code> 初始化项目</li>
+          <li><strong>配置过期</strong>：升级 OpenSpec 后运行 <code>openspec update</code> 重新生成 AI 工具配置</li>
+          <li><strong>工具未选择</strong>：检查初始化时是否选择了你使用的 AI 工具</li>
+          <li><strong>需要重启</strong>：某些 AI 工具需要重启才能加载新的 skills/commands</li>
+        </ol>
+        <div class="code-block">
+          <div class="code-header"><span>修复步骤</span></div>
+          <pre><code># 重新初始化，指定你的 AI 工具
+openspec init --tools claude,cursor --force
+
+# 或只更新配置
+openspec update --force</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <span class="faq-icon">Q</span>
+        <span class="faq-text">如何处理多个变更之间的冲突？</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>OpenSpec 支持并行变更，但当多个变更修改同一个规范时需要注意：</p>
+        <ol>
+          <li><strong>使用 /opsx:bulk-archive</strong>：它会自动检测规范冲突并按时间顺序合并</li>
+          <li><strong>先归档依赖变更</strong>：如果变更 B 依赖变更 A 的结果，先归档 A</li>
+          <li><strong>手动解决</strong>：如果冲突复杂，可以手动编辑 specs 文件后再归档</li>
+        </ol>
+        <div class="code-block">
+          <div class="code-header"><span>AI 对话 — 批量归档</span></div>
+          <pre><code>/opsx:bulk-archive
+
+# AI 会检测冲突并提示：
+# ⚠ add-dark-mode 和 update-theme-system 都修改 specs/ui/
+# 将按创建时间顺序合并：add-dark-mode → update-theme-system
+# 是否继续？</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <span class="faq-icon">Q</span>
+        <span class="faq-text">如何在团队中推广 OpenSpec？</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p><strong>推广策略：</strong></p>
+        <ol>
+          <li><strong>从小处开始</strong>：选择一个小功能作为试点，展示 OpenSpec 的价值</li>
+          <li><strong>统一配置</strong>：将 <code>openspec/config.yaml</code> 提交到代码库，确保团队使用一致的配置</li>
+          <li><strong>建立规范模板</strong>：创建团队专属的 Schema 和 templates，体现团队最佳实践</li>
+          <li><strong>结合 Code Review</strong>：将产物审查纳入 CR 流程，提高规范质量</li>
+        </ol>
+        <div class="tip-box">
+          <strong>团队配置建议：</strong>
+          <ul>
+            <li>将 <code>openspec/</code> 目录纳入版本控制</li>
+            <li>在 <code>config.yaml</code> 中添加团队约定和代码规范</li>
+            <li>定期归档变更，保持 changes/ 目录整洁</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <span class="faq-icon">Q</span>
+        <span class="faq-text">OpenSpec 支持哪些 AI 工具？</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>OpenSpec 支持 20+ AI 编码助手，包括但不限于：</p>
+        <div class="tools-mini-grid">
+          <span>Claude Code</span><span>Cursor</span><span>Windsurf</span><span>GitHub Copilot</span>
+          <span>Kiro</span><span>Cline</span><span>RooCode</span><span>Continue</span>
+          <span>Qoder</span><span>Gemini CLI</span><span>Amazon Q</span><span>Trae</span>
+        </div>
+        <p>完整列表请参考 <a href="https://github.com/Fission-AI/OpenSpec/blob/main/docs/supported-tools.md" target="_blank">官方文档</a></p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <span class="faq-icon">Q</span>
+        <span class="faq-text">如何回滚或撤销一个已归档的变更？</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>OpenSpec 本身不提供回滚功能，但你可以：</p>
+        <ol>
+          <li><strong>Git 回滚</strong>：使用 <code>git revert</code> 回滚相关提交</li>
+          <li><strong>查看归档</strong>：在 <code>openspec/changes/archive/</code> 中找到原变更的完整产物</li>
+          <li><strong>创建反向变更</strong>：创建一个新变更，使用 REMOVED 来删除之前 ADDED 的内容</li>
+        </ol>
+        <div class="code-block">
+          <div class="code-header"><span>创建反向变更示例</span></div>
+          <pre><code>/opsx:propose revert-dark-mode
+
+需要回滚暗色模式功能，原因是与第三方组件库存在兼容性问题。
+参考归档：openspec/changes/archive/2025-01-24-add-dark-mode/</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <span class="faq-icon">Q</span>
+        <span class="faq-text">如何创建自定义 Schema？</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p><strong>两种方式：</strong></p>
+        <div class="code-block">
+          <div class="code-header"><span>方式一：Fork 现有 Schema（推荐）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># Fork 默认 Schema 进行自定义
+openspec schema fork spec-driven my-workflow
+
+# 编辑 schema.yaml 和 templates/
+vim openspec/schemas/my-workflow/schema.yaml</code></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span>方式二：从零创建</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># 创建极简 Schema（只有 proposal + tasks）
+openspec schema init rapid \
+  --description "快速迭代工作流" \
+  --artifacts "proposal,tasks" \
+  --default</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <span class="faq-icon">Q</span>
+        <span class="faq-text">OpenSpec 产物会占用太多磁盘空间吗？</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-answer">
+        <p>不会。OpenSpec 产物都是轻量级 Markdown 文件：</p>
+        <ul>
+          <li>一个完整变更通常只有 10-50KB</li>
+          <li>归档会保留完整产物，但仍然很小</li>
+          <li>可以定期清理不需要的历史归档</li>
+        </ul>
+        <div class="tip-box">
+          <strong>磁盘管理建议：</strong>
+          <ul>
+            <li>将 <code>openspec/</code> 纳入 Git，享受版本控制和压缩</li>
+            <li>可以将很久以前的归档移到外部存储</li>
+            <li>归档本质是审计轨迹，建议保留</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================== 结语 ======================== -->
+<section class="content-section" id="conclusion">
+  <div class="section-header">
+    <span class="section-tag">总结</span>
+    <h2>开始你的规范驱动开发之旅</h2>
+  </div>
+
+  <div class="conclusion-content">
+    <p>OpenSpec 不仅仅是一个工具，它代表了一种全新的 AI 协作范式：<strong>先对齐，再编码</strong>。</p>
+    
+    <div class="key-takeaways">
+      <h4>关键要点回顾</h4>
+      <ul>
+        <li><strong>规范是契约</strong>：定义系统「做什么」，而非「怎么做」</li>
+        <li><strong>产物递进</strong>：Proposal → Specs → Design → Tasks，逐步明确</li>
+        <li><strong>Delta 机制</strong>：增量描述变化，完美适配存量项目</li>
+        <li><strong>可追溯</strong>：完整的变更历史和审计轨迹</li>
+        <li><strong>灵活工作流</strong>：Core 快速路径 vs Expanded 精细控制</li>
+      </ul>
+    </div>
+
+    <div class="next-steps">
+      <h4>下一步行动</h4>
+      <div class="ns-cards">
+        <div class="ns-card">
+          <span class="ns-num">1</span>
+          <p>在一个小项目上尝试 OpenSpec</p>
+        </div>
+        <div class="ns-card">
+          <span class="ns-num">2</span>
+          <p>完善你的 config.yaml 配置</p>
+        </div>
+        <div class="ns-card">
+          <span class="ns-num">3</span>
+          <p>在团队中推广规范驱动开发</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="resources">
+      <h4>更多资源</h4>
+      <div class="resource-links">
+        <a href="https://github.com/Fission-AI/OpenSpec" target="_blank" class="resource-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          GitHub 仓库
+        </a>
+        <a href="https://discord.gg/YctCnvvshC" target="_blank" class="resource-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>
+          Discord 社区
+        </a>
+        <a href="https://openspec.radebit.com" target="_blank" class="resource-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          中文文档站
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
