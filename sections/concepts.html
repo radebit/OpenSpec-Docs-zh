@@ -58,6 +58,79 @@
     </div>
   </div>
 
+  <!-- 协作工作区 (Beta) -->
+  <div class="subsection" id="concepts-workspaces">
+    <h3>协作工作区（Coordination Workspaces）<span class="badge-beta" style="display:inline-block;padding:2px 8px;margin-left:8px;border-radius:4px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:0.7em;vertical-align:middle">Beta</span></h3>
+    <div class="tip-box" style="border-left-color:#f59e0b;background:rgba(245,158,11,0.08)">
+      <strong>⚠️ 处于积极开发中</strong>：工作区相关功能尚未正式发布，命令行为、状态文件和 JSON 输出随时可能变更。不建议在生产环境或长期工作流中使用。
+    </div>
+
+    <p>仓库本地的 OpenSpec 项目适合「单仓库拥有规划、实现、归档全流程」的场景。但某些工作横跨多个仓库或文件夹，这时 <strong>协作工作区</strong> 就是一个久久的规划家园。</p>
+
+    <div class="info-box">
+      <div class="info-icon">🧠</div>
+      <div>
+        <strong>工作区心智模型</strong><br>
+        <code>workspace</code> = 相关跨仓库变更寄存的地方<br>
+        <code>link</code> = 工作区可以规划的仓库/文件夹的稳定名称<br>
+        <code>change</code> = 一个特性、修复、项目或其他规划好的工作单元
+      </div>
+    </div>
+
+    <p>工作区的目录形态与仓库本地项目不同：</p>
+    <div class="code-block">
+      <div class="code-header"><span>工作区目录结构</span></div>
+      <pre><code>workspace-folder/
+├── changes/                       # 工作区级别的规划
+└── .openspec-workspace/
+    ├── workspace.yaml             # 共享的工作区身份与链接名
+    └── local.yaml                 # 本机的本地路径（仅本机）</code></pre>
+    </div>
+
+    <p>而仓库本地 OpenSpec 保持原有形态：</p>
+    <div class="code-block">
+      <div class="code-header"><span>仓库本地目录结构</span></div>
+      <pre><code>repo-root/
+└── openspec/
+    ├── specs/
+    └── changes/</code></pre>
+    </div>
+
+    <p><strong>稳定链接名</strong> 是工作区规划引用仓库/文件夹的方式：共享状态保留诸如 <code>api</code>、<code>web</code>、<code>checkout</code> 之类的名称，每台机器再将它们映射到自己的本地路径。</p>
+
+    <div class="code-block">
+      <div class="code-header"><span>.openspec-workspace/workspace.yaml（可移植）</span></div>
+      <pre><code>version: 1
+name: platform
+links:
+  api: {}
+  web: {}</code></pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span>.openspec-workspace/local.yaml（仅本机）</span></div>
+      <pre><code>version: 1
+paths:
+  api: /repos/api
+  web: /repos/web</code></pre>
+    </div>
+
+    <p>链接路径可以是完整的仓库、大型 monorepo 中的文件夹、或其他已存在的文件夹。它们不需要先初始化仓库本地 <code>openspec/</code> 状态即可参与工作区规划：</p>
+    <div class="code-block">
+      <div class="code-header"><span>两种典型场景</span></div>
+      <pre><code># 多仓库：
+api      -> /repos/api
+web      -> /repos/web
+
+# 大型 monorepo：
+billing  -> /repos/platform/services/billing
+checkout -> /repos/platform/apps/checkout</code></pre>
+    </div>
+
+    <div class="tip-box">
+      <strong>工作区可见性 ≠ 变更承诺</strong>：先创建工作区让 OpenSpec 知道相关的仓库/文件夹，准备规划具体特性时再创建 change。详细命令见 <a href="#cli-workspace">CLI 参考 - 工作区命令</a>。
+    </div>
+  </div>
+
   <!-- 规范 -->
   <div class="subsection" id="concepts-specs">
     <h3>规范 (Specs)</h3>

@@ -63,6 +63,32 @@
   </div>
 
   <div class="changelog-timeline">
+    <!-- V1.0.6 -->
+    <div class="changelog-item">
+      <div class="changelog-marker"></div>
+      <div class="changelog-content">
+        <div class="changelog-header">
+          <span class="changelog-version">V1.0.6</span>
+          <span class="changelog-date">2026-03-11</span>
+        </div>
+        <div class="changelog-summary">同步官方 v1.3.1 版本更新</div>
+        <div class="changelog-details">
+          <ul>
+            <li><strong>Core profile 工作流调整</strong>：<code>/opsx:sync</code> 从扩展工作流正式进入 core profile，默认路径变为 <code>propose → apply → sync → archive</code></li>
+            <li><strong>新增 Workspace 命令族（Beta）</strong>：<code>workspace setup/list/link/relink/doctor/open</code> 支持跨多仓库或文件夹的协作规划</li>
+            <li><strong>新增 2 款 AI 工具支持</strong>：Kimi CLI、Lingma（通义灵码）正式纳入标准工具列表</li>
+            <li><strong>新增「协作工作区」概念章节</strong>：说明 workspace / link / change 心智模型、目录结构与应用场景</li>
+            <li><strong>Bun 安装补充说明</strong>：Bun 全局安装 OpenSpec 仍需 Node.js 20.19.0+ 在 PATH 中</li>
+            <li>其他官方修复：Windows 路径规范化、realpath 优先、glob 特殊字符转义、omz completion compinit、XDG_CONFIG_HOME/%APPDATA% 遥测配置路径、需求头解析大小写不敏感</li>
+          </ul>
+        </div>
+        <button class="changelog-toggle" onclick="toggleChangelog(this)">
+          <span>展开详情</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+      </div>
+    </div>
+
     <!-- V1.0.5 -->
     <div class="changelog-item">
       <div class="changelog-marker"></div>

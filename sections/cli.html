@@ -11,6 +11,7 @@
       <thead><tr><th>分类</th><th>命令</th><th>用途</th></tr></thead>
       <tbody>
         <tr><td><strong>设置</strong></td><td><code>init</code>、<code>update</code></td><td>初始化和更新项目中的 OpenSpec</td></tr>
+        <tr><td><strong>工作区（Beta）</strong></td><td><code>workspace setup</code>、<code>workspace list</code>、<code>workspace link</code>、<code>workspace relink</code>、<code>workspace doctor</code>、<code>workspace open</code></td><td>跨仓库或文件夹的协作工作区规划</td></tr>
         <tr><td><strong>浏览</strong></td><td><code>list</code>、<code>view</code>、<code>show</code></td><td>探索变更和规范</td></tr>
         <tr><td><strong>验证</strong></td><td><code>validate</code></td><td>检查变更和规范的问题</td></tr>
         <tr><td><strong>生命周期</strong></td><td><code>archive</code></td><td>完成已完成的变更</td></tr>
@@ -75,6 +76,147 @@ openspec init --profile core</code></pre>
 npm update @fission-ai/openspec
 openspec update</code></pre>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 工作区命令 (Beta) -->
+  <div class="subsection" id="cli-workspace">
+    <h3>工作区命令 <span class="badge-beta" style="display:inline-block;padding:2px 8px;margin-left:8px;border-radius:4px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:0.7em;vertical-align:middle">Beta</span></h3>
+    <div class="tip-box" style="border-left-color:#f59e0b;background:rgba(245,158,11,0.08)">
+      <strong>⚠️ 处于积极开发中</strong>：工作区相关命令尚未正式发布。<strong>请不要</strong>基于此命令面构建外部自动化、集成或长期工作流——命令行为、状态文件和 JSON 输出随时可能变更。
+    </div>
+    <p>协作工作区（Coordination Workspace）是用于规划跨多仓库/文件夹工作的久久规划家园。工作区只是「让 OpenSpec 看到哪些仓库/文件夹」，并不代表变更承诺。</p>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec workspace setup</code>
+        <span class="cli-desc">创建工作区并链接到至少一个已存在的仓库/文件夹</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="table-wrapper">
+          <table class="doc-table">
+            <thead><tr><th>选项</th><th>描述</th></tr></thead>
+            <tbody>
+              <tr><td><code>--name &lt;name&gt;</code></td><td>工作区名（kebab-case）</td></tr>
+              <tr><td><code>--link &lt;path&gt;</code></td><td>链接已存在的仓库/文件夹，从文件夹名推断链接名</td></tr>
+              <tr><td><code>--link &lt;name&gt;=&lt;path&gt;</code></td><td>显式指定链接名</td></tr>
+              <tr><td><code>--opener &lt;id&gt;</code></td><td>偏好打开器：<code>codex</code>、<code>claude</code>、<code>github-copilot</code>、<code>editor</code></td></tr>
+              <tr><td><code>--no-interactive</code></td><td>禁用交互（需 <code>--name</code> 和至少一个 <code>--link</code>）</td></tr>
+              <tr><td><code>--json</code></td><td>JSON 输出（需配合 <code>--no-interactive</code>）</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># 交互式向导
+openspec workspace setup
+
+# 自动化场景
+openspec workspace setup --no-interactive --name platform \
+  --link /repos/api --link web=/repos/web
+
+# 带偏好打开器
+openspec workspace setup --no-interactive --name platform \
+  --link /repos/api --opener codex</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec workspace list / ls</code>
+        <span class="cli-desc">列出本机已知工作区及其链接</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec workspace list
+openspec workspace ls
+openspec workspace list --json</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec workspace link</code>
+        <span class="cli-desc">向工作区登记一个已存在的仓库/文件夹</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code># 从文件夹名自动推断链接名
+openspec workspace link /repos/api
+
+# 显式指定链接名
+openspec workspace link api-service /repos/api
+
+# 指定目标工作区
+openspec workspace link --workspace platform /repos/platform/apps/checkout</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec workspace relink</code>
+        <span class="cli-desc">修复或更改已有链接的本地路径</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec workspace relink api-service /new/path/to/api</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec workspace doctor</code>
+        <span class="cli-desc">检查当前机器上工作区的解析情况</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec workspace doctor
+openspec workspace doctor --workspace platform</code></pre>
+        </div>
+        <p style="color:var(--text-tertiary);font-size:0.9em">显示工作区位置、规划路径、已链接仓库/文件夹、缺失路径及修复建议；仅报告问题，不自动修复。</p>
+      </div>
+    </div>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec workspace open</code>
+        <span class="cli-desc">通过偏好打开器启动工作区</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="table-wrapper">
+          <table class="doc-table">
+            <thead><tr><th>选项</th><th>描述</th></tr></thead>
+            <tbody>
+              <tr><td><code>--workspace &lt;name&gt;</code></td><td>工作区名称（位置参数的别名）</td></tr>
+              <tr><td><code>--agent &lt;tool&gt;</code></td><td>本次会话覆盖：<code>codex</code>、<code>claude</code>、<code>github-copilot</code></td></tr>
+              <tr><td><code>--editor</code></td><td>以 VS Code 编辑器模式打开多根工作区文件</td></tr>
+              <tr><td><code>--no-interactive</code></td><td>禁用工作区和打开器选择提示</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec workspace open
+openspec workspace open platform
+openspec workspace open platform --agent github-copilot
+openspec workspace open --editor</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-icon">💡</div>
+      <div>
+        OpenSpec 会自动维护工作区根下的 <code>&lt;workspace-name&gt;.code-workspace</code> 多根工作区文件（仅本机），默认已加入 <code>.gitignore</code>。跨路径（Windows/WSL2等）不做自动转换，请使用运行时匹配的路径格式。
       </div>
     </div>
   </div>

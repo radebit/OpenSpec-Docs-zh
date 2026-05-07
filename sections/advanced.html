@@ -14,9 +14,11 @@
         <span>→</span>
         <code>/opsx:apply</code>
         <span>→</span>
+        <code>/opsx:sync</code>
+        <span>→</span>
         <code>/opsx:archive</code>
       </div>
-      <p>新安装默认使用 core，包含：propose、explore、apply、archive</p>
+      <p>新安装默认使用 core，包含：propose、explore、apply、sync、archive</p>
     </div>
     <div class="wf-mode">
       <div class="wf-mode-title">扩展工作流（自定义选择）</div>
@@ -231,7 +233,7 @@ openspec schema fork spec-driven with-review
   <div class="section-header">
     <span class="section-tag">集成</span>
     <h2>支持的 AI 工具</h2>
-    <p>OpenSpec 与 28+ AI 编码助手集成，运行 openspec init 时自动配置</p>
+    <p>OpenSpec 与 30+ AI 编码助手集成，运行 openspec init 时自动配置</p>
   </div>
 
   <div class="tools-grid">
@@ -262,7 +264,8 @@ openspec schema fork spec-driven with-review
     <div class="tool-card">IBM Bob Shell</div>
     <div class="tool-card">ForgeCode</div>
     <div class="tool-card">Junie</div>
-    <div class="tool-card">Lingma IDE</div>
+    <div class="tool-card">Kimi CLI</div>
+    <div class="tool-card">Lingma（通义灵码）</div>
   </div>
 
   <div class="subsection">
@@ -290,7 +293,7 @@ openspec init --profile core</code></pre>
       <table class="doc-table">
         <thead><tr><th>Profile</th><th>包含的工作流</th></tr></thead>
         <tbody>
-          <tr><td><strong>Core（默认）</strong></td><td>propose、explore、apply、archive</td></tr>
+          <tr><td><strong>Core（默认）</strong></td><td>propose、explore、apply、sync、archive</td></tr>
           <tr><td><strong>Custom（自定义）</strong></td><td>可选择：propose、explore、new、continue、apply、ff、sync、archive、bulk-archive、verify、onboard 的任意子集</td></tr>
         </tbody>
       </table>

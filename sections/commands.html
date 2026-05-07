@@ -13,6 +13,7 @@
         <div class="qr-item"><code>/opsx:propose</code><span>创建变更并一键生成规划产物</span></div>
         <div class="qr-item"><code>/opsx:explore</code><span>在提交变更前思考和探索想法</span></div>
         <div class="qr-item"><code>/opsx:apply</code><span>实现变更中的任务</span></div>
+        <div class="qr-item"><code>/opsx:sync</code><span>将 Delta 规范合并到主规范</span></div>
         <div class="qr-item"><code>/opsx:archive</code><span>归档已完成的变更</span></div>
       </div>
     </div>
@@ -23,7 +24,6 @@
         <div class="qr-item"><code>/opsx:continue</code><span>按依赖顺序创建下一个产物</span></div>
         <div class="qr-item"><code>/opsx:ff</code><span>快进：一次创建所有规划产物</span></div>
         <div class="qr-item"><code>/opsx:verify</code><span>验证实现是否与产物匹配</span></div>
-        <div class="qr-item"><code>/opsx:sync</code><span>将 Delta 规范合并到主规范</span></div>
         <div class="qr-item"><code>/opsx:bulk-archive</code><span>批量归档多个变更</span></div>
         <div class="qr-item"><code>/opsx:onboard</code><span>引导式完整工作流教程</span></div>
       </div>
@@ -263,9 +263,9 @@ AI:  验证 add-dark-mode...
     <div class="cmd-card" id="cmd-sync">
       <div class="cmd-header">
         <div class="cmd-name"><code>/opsx:sync</code></div>
-        <div class="cmd-badge badge-expanded">扩展工作流（可选）</div>
+        <div class="cmd-badge badge-core">core profile</div>
       </div>
-      <p class="cmd-desc">将 Delta 规范从变更合并到主规范。归档时会提示同步，通常无需手动运行。</p>
+      <p class="cmd-desc">将 Delta 规范从变更合并到主规范。从 v1.3.1 起 sync 已纳入 core profile，可在归档前先同步规范；归档时也会提示同步。</p>
       <div class="cmd-syntax">
         <span class="syntax-label">语法</span>
         <code>/opsx:sync [变更名]</code>

@@ -61,7 +61,7 @@ OpenSpec-Docs-zh/
 | CLI 终端命令参考 | `docs/cli.md` |
 | 工作流模式 | `docs/workflows.md` |
 | 自定义配置 | `docs/customization.md` |
-| 支持的 AI 工具（28+款） | `docs/supported-tools.md` |
+| 支持的 AI 工具（30+款） | `docs/supported-tools.md` |
 | 多语言支持 | `docs/multi-language.md` |
 | 实战指南 | 社区补充内容 |
 | 关于文档 & 更新历史 | 社区维护 |
@@ -71,7 +71,7 @@ OpenSpec-Docs-zh/
 ## 与官方文档的关系
 
 - 本项目基于官方英文文档翻译整理，**为独立社区项目，非官方出品**
-- 当前同步至官方版本：**v1.3.0**（新增 IBM Bob Shell、ForgeCode、Junie、Lingma IDE 等工具支持）
+- 当前同步至官方版本：**v1.3.1**（sync 进入 core profile、新增 Workspace 命令族 Beta、新增 Kimi CLI / Lingma 工具支持）
 - 部分技术术语进行了本地化处理，例如：
   - `Source of Truth` → 权威基准
   - `Brownfield Development` → 存量项目开发
