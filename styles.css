@@ -301,6 +301,159 @@ body {
   z-index: 1;
 }
 
+.book-ad {
+  display: none;
+  position: fixed;
+  top: calc(var(--topnav-height) + 32px);
+  right: 24px;
+  width: 200px;
+  max-height: calc(100vh - var(--topnav-height) - 120px);
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+  z-index: 100;
+}
+
+.book-ad.is-visible:not([hidden]) {
+  display: block;
+}
+
+.book-ad[hidden] {
+  display: none;
+}
+
+.book-ad-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 8px 8px 12px;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.book-ad-label {
+  margin-left: 4px;
+  color: #40454d;
+  font-size: 0.65rem;
+}
+
+.book-ad-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.book-ad-close:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.book-ad-close:focus-visible {
+  outline-offset: -2px;
+}
+
+.book-ad-link {
+  display: block;
+  padding: 0 12px 12px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.book-ad-cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.book-ad-title {
+  display: block;
+  margin: 12px 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.book-ad-cta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(6, 182, 212, 0.08);
+  color: var(--accent-3);
+  font-size: 0.78rem;
+  transition: background 0.15s ease;
+}
+
+.book-ad-link:hover .book-ad-cta {
+  background: rgba(6, 182, 212, 0.16);
+}
+
+.book-ad-link:focus-visible {
+  outline-offset: -3px;
+}
+
+@media (min-width: 1200px) and (min-height: 640px) {
+  .main-content {
+    padding-right: 224px;
+  }
+}
+
+@media (max-width: 1199px), (max-height: 639px) {
+  .book-ad {
+    top: auto;
+    right: 16px;
+    bottom: 88px;
+    width: min(240px, calc(100vw - 32px));
+  }
+
+  .book-ad-header {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    font-size: 0.7rem;
+  }
+
+  .book-ad-close {
+    width: 24px;
+    height: 24px;
+  }
+
+  .book-ad-link {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 6px 10px;
+  }
+
+  .book-ad-cover {
+    grid-row: 1 / 3;
+    align-self: start;
+  }
+
+  .book-ad-title {
+    margin: 0;
+    font-size: 0.74rem;
+    line-height: 1.5;
+  }
+
+  .book-ad-cta {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+}
+
 /* ==========================================
    Hero 区域
    ========================================== */

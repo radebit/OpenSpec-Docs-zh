@@ -6,7 +6,7 @@
 <title>OpenSpec — AI 原生规范驱动开发系统</title>
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="shortcut icon" href="assets/favicon.svg">
-<link rel="stylesheet" href="styles.css?v=1.15.0-ui3">
+<link rel="stylesheet" href="styles.css?v=1.15.0-ui5">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
@@ -339,9 +339,37 @@
 
 </main>
 
+<aside class="book-ad" id="bookAd" aria-label="图书推荐广告">
+  <div class="book-ad-header">
+    <span>图书推荐 <span class="book-ad-label">广告</span></span>
+    <button class="book-ad-close" type="button" aria-label="关闭图书推荐广告" onclick="this.closest('.book-ad').hidden = true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <a class="book-ad-link" href="https://union-click.jd.com/jdc?e=618%7Cpc%7C&amp;p=JF8BAT0JK1olWAQFU1taCkgXC18IH18XWgMAXW4ZVxNJXF9RXh5UHw0cSgYYXBcIWDoXSQVJQwYGUFxaDUkeHDZNRwYlGVVbEyQ4eEtyWmgObCR-KmNgASY5TkcbM2oIGlMXXgIBUVxtC0oVCmkMGFsWXzYyVF9tWiUfC2cIE1kWWAUKU25fCEofC2wNGVkXbQYEXFxeD0MRC2oBE1IlWgYLZB0NXR9EWyo4K2sWbQECXUpbegpFF2l6K2sVbQUyVF9dAEgXAGoIG1IJXQIEUlxdFEsRC20LHFkSWgYLU19tCkoWB2Y4K4WY7XIFHyc6fBwTdBdVWRJrDU_c2e5MejsXB24OCmtmKmYKL1c5Sy9HfykASS1zKAVVDBhVWhdfdzRfZTt7X19ZViMbdUpLaB94Xg1mG0ILZFttCE0XAV8JKw" target="_blank" rel="sponsored noopener noreferrer">
+    <img class="book-ad-cover" src="https://oss.radebit.com/images/2026/10/29/202610291830328854.jpg" alt="SDD工程实战图书封面" width="350" height="350" decoding="async">
+    <span class="book-ad-title">SDD工程实战：用OpenSpec从零构建真实项目</span>
+    <span class="book-ad-cta">查看图书 <span aria-hidden="true">↗</span></span>
+  </a>
+</aside>
+
 <!-- 返回顶部按钮 -->
 <button class="back-to-top" id="backToTop" onclick="scrollToTop()" aria-label="返回顶部">↑</button>
 
+<script>
+(() => {
+  const ad = document.getElementById('bookAd');
+  const overview = document.getElementById('overview');
+  const updateBookAd = () => {
+    const headerBottom = document.querySelector('.top-nav').getBoundingClientRect().bottom;
+    const firstScreenHeight = Math.min(overview.offsetHeight, window.innerHeight);
+    ad.classList.toggle('is-visible', window.scrollY >= firstScreenHeight - headerBottom);
+  };
+  window.addEventListener('scroll', updateBookAd, { passive: true });
+  window.addEventListener('resize', updateBookAd);
+  updateBookAd();
+})();
+</script>
 <script src="script.js?v=1.15.0-ui1"></script>
 </body>
 </html>
