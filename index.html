@@ -6,7 +6,7 @@
 <title>OpenSpec — AI 原生规范驱动开发系统</title>
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="shortcut icon" href="assets/favicon.svg">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=1.15.0-ui3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
@@ -21,7 +21,7 @@
   <div class="nav-brand">
     <img src="assets/openspec_pixel_dark.svg" alt="OpenSpec" class="nav-logo" />
     <span class="nav-title">OpenSpec</span>
-    <span class="nav-version">v2.x</span>
+    <span class="nav-version">v1.15.0</span>
   </div>
   <nav class="nav-links">
     <a href="#overview" class="nav-link">概览</a>
@@ -40,7 +40,7 @@
       官方
     </a>
   </nav>
-  <button class="mobile-menu-btn" id="mobileMenuBtn">
+  <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="打开目录" aria-expanded="false" aria-controls="sidebar">
     <span></span><span></span><span></span>
   </button>
 </header>
@@ -63,6 +63,7 @@
       <a href="#concepts-delta" class="sidebar-link">Delta 规范</a>
       <a href="#concepts-schemas" class="sidebar-link">Schema 机制</a>
       <a href="#concepts-archive" class="sidebar-link">归档机制</a>
+      <a href="#concepts-stores" class="sidebar-link">Store 与 Workset（Beta）</a>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-section-title">工作流命令</div>
@@ -72,15 +73,20 @@
       <a href="#cmd-continue" class="sidebar-link"><code>/opsx:continue</code></a>
       <a href="#cmd-ff" class="sidebar-link"><code>/opsx:ff</code></a>
       <a href="#cmd-apply" class="sidebar-link"><code>/opsx:apply</code></a>
+      <a href="#cmd-update" class="sidebar-link"><code>/opsx:update</code></a>
       <a href="#cmd-verify" class="sidebar-link"><code>/opsx:verify</code></a>
       <a href="#cmd-sync" class="sidebar-link"><code>/opsx:sync</code></a>
       <a href="#cmd-archive" class="sidebar-link"><code>/opsx:archive</code></a>
       <a href="#cmd-bulk-archive" class="sidebar-link"><code>/opsx:bulk-archive</code></a>
       <a href="#cmd-onboard" class="sidebar-link"><code>/opsx:onboard</code></a>
+      <a href="#tool-invocation" class="sidebar-link">各工具调用方式</a>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-section-title">CLI 参考</div>
       <a href="#cli-setup" class="sidebar-link">初始化与更新</a>
+      <a href="#cli-store" class="sidebar-link">Store（Beta）</a>
+      <a href="#cli-context" class="sidebar-link">诊断与上下文</a>
+      <a href="#cli-workset" class="sidebar-link">Workset（Beta）</a>
       <a href="#cli-browse" class="sidebar-link">浏览命令</a>
       <a href="#cli-validate" class="sidebar-link">验证命令</a>
       <a href="#cli-lifecycle" class="sidebar-link">生命周期命令</a>
@@ -162,8 +168,8 @@
       </div>
       <div class="hero-stats">
         <div class="stat-item">
-          <span class="stat-number">20+</span>
-          <span class="stat-label">支持 AI 工具</span>
+          <span class="stat-number">50</span>
+          <span class="stat-label">工具集成目标</span>
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
@@ -172,8 +178,8 @@
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-          <span class="stat-number">Node 20+</span>
-          <span class="stat-label">运行环境</span>
+          <span class="stat-number">免 Node.js</span>
+          <span class="stat-label">独立二进制安装</span>
         </div>
       </div>
     </div>
@@ -183,8 +189,8 @@
   <section class="content-section" id="demo">
     <div class="section-header">
       <span class="section-tag">演示</span>
-      <h2>三步完成一个完整变更</h2>
-      <p>OpenSpec 简化了从想法到实现再到归档的完整开发流程</p>
+      <h2>从提案到实现与归档</h2>
+      <p>以下为 Claude Code 对话示意。规划经审查后再实现，验证通过后再归档；需要修订规划时使用 update，提前合并规范时使用 sync。</p>
     </div>
     <div class="demo-terminal">
       <div class="terminal-header">
@@ -250,7 +256,7 @@
       <div class="feature-card">
         <div class="card-icon">🔧</div>
         <h3>工具生态广泛</h3>
-        <p>通过 Slash 命令支持 20+ AI 助手，包括 Claude Code、Cursor、Windsurf 等主流工具</p>
+        <p>提供 50 个工具集成目标，以技能或工具专属命令接入 Claude Code、Codex、Cursor、Devin 等工具</p>
       </div>
     </div>
     <div class="compare-section">
@@ -334,8 +340,8 @@
 </main>
 
 <!-- 返回顶部按钮 -->
-<button class="back-to-top" id="backToTop" onclick="scrollToTop()">↑</button>
+<button class="back-to-top" id="backToTop" onclick="scrollToTop()" aria-label="返回顶部">↑</button>
 
-<script src="script.js"></script>
+<script src="script.js?v=1.15.0-ui1"></script>
 </body>
 </html>

@@ -2,8 +2,8 @@
 <section class="content-section" id="commands">
   <div class="section-header">
     <span class="section-tag">命令参考</span>
-    <h2>OPSX Slash 命令</h2>
-    <p>在 AI 编码助手的对话界面中调用（如 Claude Code、Cursor、Windsurf）</p>
+    <h2>工作流与调用方式</h2>
+    <p>以下 <code>/opsx:</code> 写法与对话示例均为 Claude Code 的示意，并非实测输出或所有工具的统一语法。其他工具见<a href="#tool-invocation">调用方式</a>。</p>
   </div>
 
   <div class="cmd-quick-ref">
@@ -13,6 +13,7 @@
         <div class="qr-item"><code>/opsx:propose</code><span>创建变更并一键生成规划产物</span></div>
         <div class="qr-item"><code>/opsx:explore</code><span>在提交变更前思考和探索想法</span></div>
         <div class="qr-item"><code>/opsx:apply</code><span>实现变更中的任务</span></div>
+        <div class="qr-item"><code>/opsx:update</code><span>原地修订现有规划产物</span></div>
         <div class="qr-item"><code>/opsx:sync</code><span>将 Delta 规范合并到主规范</span></div>
         <div class="qr-item"><code>/opsx:archive</code><span>归档已完成的变更</span></div>
       </div>
@@ -52,7 +53,7 @@
         </table>
       </div>
       <div class="code-block">
-        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-header"><span>Claude Code 对话示意（非实测）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
         <pre><code>You: /opsx:propose add-dark-mode
 
 AI:  已创建 openspec/changes/add-dark-mode/
@@ -60,9 +61,10 @@ AI:  已创建 openspec/changes/add-dark-mode/
      ✓ specs/ui/spec.md
      ✓ design.md
      ✓ tasks.md
-     准备好实现。运行 /opsx:apply。</code></pre>
+     规划已生成，请先审查。此处停止，不开始实现。
+     审查后由你另行授权 /opsx:apply。</code></pre>
       </div>
-      <div class="tip-box">如果你想分步骤控制产物创建，请启用扩展工作流并使用 <code>/opsx:new</code> + <code>/opsx:continue</code>。</div>
+      <div class="tip-box">propose 只获授权生成规划，即使最初要求“构建”也不会接着写代码。先只读检查相关代码、测试与文档，再按当前 Schema 的指令生成产物。若需逐步审查，启用扩展工作流并使用 <code>/opsx:new</code> + <code>/opsx:continue</code>。</div>
     </div>
 
     <div class="cmd-card" id="cmd-explore">
@@ -76,7 +78,7 @@ AI:  已创建 openspec/changes/add-dark-mode/
         <code>/opsx:explore [话题]</code>
       </div>
       <div class="code-block">
-        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-header"><span>Claude Code 对话示意（非实测）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
         <pre><code>You: /opsx:explore
 
 AI:  你想探索什么？
@@ -97,9 +99,10 @@ AI:  让我来研究你当前的认证设置...
 
 You: 让我们用 JWT。能开始一个变更吗？
 
-AI:  准备好了。运行 /opsx:propose add-jwt-auth 开始。</code></pre>
+AI:  你已授权开始变更，我会在本次探索中创建脚手架并展示状态。
+     若还需记录规划，请明确指定产物；不会开始实现。</code></pre>
       </div>
-      <div class="tip-box">探索期间不会创建产物。适合在决定之前比较多种方案。</div>
+      <div class="tip-box">默认只研究。用户明确授权后，可在当前会话中 capture 变更或指定规划产物，不必另发工作流命令。自定义 Schema 只记录到其定义的产物，捕获规划不等于授权实现。</div>
     </div>
 
     <div class="cmd-card" id="cmd-new">
@@ -113,7 +116,7 @@ AI:  准备好了。运行 /opsx:propose add-jwt-auth 开始。</code></pre>
         <code>/opsx:new [变更名] [--schema &lt;schema-name&gt;]</code>
       </div>
       <div class="code-block">
-        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-header"><span>Claude Code 对话示意（非实测）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
         <pre><code>You: /opsx:new add-dark-mode
 
 AI:  已创建 openspec/changes/add-dark-mode/
@@ -136,7 +139,7 @@ AI:  已创建 openspec/changes/add-dark-mode/
         <code>/opsx:continue [变更名]</code>
       </div>
       <div class="code-block">
-        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-header"><span>Claude Code 对话示意（非实测）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
         <pre><code>You: /opsx:continue
 
 AI:  变更: add-dark-mode
@@ -145,15 +148,15 @@ AI:  变更: add-dark-mode
      ✓ proposal    (完成)
      ◆ specs       (就绪)
      ◆ design      (就绪)
-     ○ tasks       (阻塞 - 需要: specs)
+     ○ tasks       (阻塞 - 需要: specs、design)
 
      正在创建 specs...
      ✓ 已创建 openspec/changes/add-dark-mode/specs/ui/spec.md
 
-     现在可用: tasks
+     现在可用: design；tasks 仍需等待 design。
      运行 /opsx:continue 创建下一个产物。</code></pre>
       </div>
-      <div class="tip-box">当你想在继续之前审查每个产物时使用。可以在继续之前编辑已创建的产物。</div>
+      <div class="tip-box">每次只推进一个产物，按 Schema 的依赖及声明顺序选择。默认 specs glob 任一文件存在即可显示 done，仍需检查提案中的 capability 是否全部覆盖，补齐后再推进。现有规划的一致性修订用 <code>/opsx:update</code>。</div>
     </div>
 
     <div class="cmd-card" id="cmd-ff">
@@ -161,13 +164,13 @@ AI:  变更: add-dark-mode
         <div class="cmd-name"><code>/opsx:ff</code></div>
         <div class="cmd-badge badge-expanded">扩展工作流</div>
       </div>
-      <p class="cmd-desc">快进产物创建。一次创建所有规划产物。</p>
+      <p class="cmd-desc">快进产物创建。一次生成 apply 所需规划及其依赖，完成后停止等待审查与实现授权。</p>
       <div class="cmd-syntax">
         <span class="syntax-label">语法</span>
         <code>/opsx:ff [变更名]</code>
       </div>
       <div class="code-block">
-        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-header"><span>Claude Code 对话示意（非实测）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
         <pre><code>You: /opsx:ff add-dark-mode
 
 AI:  快进 add-dark-mode...
@@ -177,10 +180,10 @@ AI:  快进 add-dark-mode...
      ✓ 创建 design.md
      ✓ 创建 tasks.md
 
-     所有规划产物完成！
-     准备好实现。运行 /opsx:apply 开始。</code></pre>
+     apply 所需规划已生成，请先审查。
+     只有另行授权 /opsx:apply 后才开始实现。</code></pre>
       </div>
-      <div class="tip-box">当你对要构建的内容有清晰认识时使用。适合中小型功能。</div>
+      <div class="tip-box">ff 创建 apply 所需产物及其传递依赖，并非无条件创建 Schema 的所有可选产物。生成前只读检查项目，遵循各产物的 <code>instruction</code>、模板与依赖；若指令委托其他 skill，只能在已核对的输出路径内执行。快进不省略审查，也不自动授权实现。</div>
     </div>
 
     <div class="cmd-card" id="cmd-apply">
@@ -194,26 +197,64 @@ AI:  快进 add-dark-mode...
         <code>/opsx:apply [变更名]</code>
       </div>
       <div class="code-block">
-        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-header"><span>Claude Code 对话示意（非实测）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
         <pre><code>You: /opsx:apply
 
 AI:  实现 add-dark-mode...
 
      读取 tasks.md:
-     - [ ] 1.1 创建 ThemeContext
-     - [ ] 1.2 添加 CSS 自定义属性
-     - [ ] 1.3 实现 localStorage 持久化
+     - [ ] 1.1 创建 ThemeContext；验证：主题切换单元测试通过
+     - [ ] 1.2 添加 CSS 自定义属性；验证：页面两种主题显示正确
+     - [ ] 1.3 实现 localStorage 持久化；验证：刷新后主题保持
 
-     处理 1.1: 创建 ThemeContext...
+     处理 1.1: 创建 ThemeContext 并运行指定测试...
      [创建 src/context/ThemeContext.tsx]
-     ✓ 1.1 完成
+     ✓ 1.1 完成，更新对应 sourcePath、line 的复选框
 
-     处理 1.2: 添加 CSS 自定义属性...
+     处理 1.2: 添加 CSS 自定义属性并检查页面显示...
      [更新 src/styles/globals.css]
-     ✓ 1.2 完成
-     ...</code></pre>
+     ✓ 1.2 完成，重新读取进度
+     ...
+     全部任务完成后：建议审查或验证，不自动运行 verify 或归档。</code></pre>
       </div>
-      <div class="tip-box">如果被打断可以恢复。可以通过指定变更名来并行处理多个变更。完成状态在 tasks.md 复选框中跟踪。</div>
+      <ul class="styled-list">
+        <li><strong>缺少 Delta：</strong>Schema 定义了 specs、没有 Delta 且未设置 <code>skip_specs: true</code> 时，apply 给出警告。警告不改变 <code>apply.requires</code> 门槛，也不代表规范合格；应先补齐或明确有意跳过。</li>
+        <li><strong>逐任务验证：</strong>默认 tasks 指令要求每项写明测试、命令、可观察行为或交付物。只在指定行为完整实现后打勾，不以部分实现、延后或缩减范围冒充完成。</li>
+        <li><strong>状态与恢复：</strong>读取当前 Schema 的 <code>contextFiles</code> 与 apply 指令。按返回的 <code>sourcePath</code>、<code>line</code> 核对并修改复选框，再刷新进度；blocked、错误或新增范围时暂停。</li>
+      </ul>
+      <div class="tip-box">完成复选框只代表跟踪任务完成，不等于验证通过或可直接归档。apply 完成后只建议审查或验证，<code>/opsx:verify</code> 需先启用并由用户调用。</div>
+    </div>
+
+    <div class="cmd-card" id="cmd-update">
+      <div class="cmd-header">
+        <div class="cmd-name"><code>/opsx:update</code></div>
+        <div class="cmd-badge badge-core">core profile</div>
+      </div>
+      <p class="cmd-desc">原地逐项修订现有规划产物，检查提案、规范、设计与任务之间的矛盾，不重建变更，不编写实现代码。</p>
+      <div class="cmd-syntax">
+        <span class="syntax-label">语法</span>
+        <code>/opsx:update [变更名]</code>
+      </div>
+      <ul class="styled-list">
+        <li><strong>逐项确认：</strong>读取当前 status 的 Schema、产物 ID 与 <code>existingOutputPaths</code>，先在对话中展示每项修订及原因，用户确认后才写入。拒绝的项保持原样，前后依赖都可回查。</li>
+        <li><strong>保留进度：</strong>不 reset 已打勾任务，不把规划修订当成重建。修订涉及代码时，只提示重新授权 apply；不自动实现、验证或归档。</li>
+        <li><strong>缺失产物：</strong>完全没有文件的 ready/blocked 产物交给已启用的 continue，或按 <code>openspec instructions &lt;artifact-id&gt; --change &lt;name&gt; --json</code> 另行创建。skipped 产物保持不动。</li>
+        <li><strong>部分 glob 例外：</strong>已有文件的 glob 产物可补缺失 capability 文件。先取当前指令、模板、规则与依赖，逐项确认；创建前刷新并核对具体路径在 changeRoot 内、匹配 glob 且不存在，不向 glob 字符串写入，也不覆盖已有文件。</li>
+      </ul>
+      <div class="code-block">
+        <div class="code-header"><span>Claude Code 对话示意（非实测）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <pre><code>You: /opsx:update add-dark-mode
+     请把主题偏好改为跟随系统，并协调现有规划。
+
+AI:  建议先修改 design 的默认策略，再修订 specs 的对应场景。
+     我会分别展示差异并等待确认；现有任务勾选状态不重置。
+
+You: 先确认 design 的修改。
+
+AI:  仅写入已确认的 design 修订，其他项等待确认。
+     若需调整实现，请审查后另行授权 apply。</code></pre>
+      </div>
+      <div class="tip-box"><strong>不是终端命令：</strong><code>openspec update</code> 刷新工具集成文件；<code>/opsx:update</code>（skill：<code>openspec-update-change</code>）修订变更规划。若变更意图已根本改变，应另建变更。</div>
     </div>
 
     <div class="cmd-card" id="cmd-verify">
@@ -236,28 +277,32 @@ AI:  实现 add-dark-mode...
           </tbody>
         </table>
       </div>
+      <div class="table-wrapper">
+        <table class="doc-table">
+          <thead><tr><th>Delta 操作</th><th>验证基准</th></tr></thead>
+          <tbody>
+            <tr><td><code>ADDED</code></td><td>按 Delta 的新需求及场景查实现和测试。</td></tr>
+            <tr><td><code>MODIFIED</code></td><td>按 Delta 的新文本验证，不以主规范旧文本代替。</td></tr>
+            <tr><td><code>REMOVED</code></td><td>先按大小写敏感、精确规范化名称从主规范读取原需求正文与场景。已同步移除时，从同一路径的规划仓库 Git 历史恢复 baseline，再检查旧行为是否消失，不能只搜标题。</td></tr>
+            <tr><td><code>RENAMED</code></td><td>读取主规范 FROM 的 baseline；已同步时可读 TO，检查行为保持。TO 同时 MODIFIED 时按修改后的文本验证，不要求代码符号改名。</td></tr>
+          </tbody>
+        </table>
+      </div>
       <div class="code-block">
-        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-header"><span>Claude Code 对话示意（非实测）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
         <pre><code>You: /opsx:verify
 
 AI:  验证 add-dark-mode...
+     任务完成：8/8（只说明跟踪任务完成）
+     ADDED/MODIFIED：检查实现与场景，记录文件、行号及证据
+     REMOVED：主规范与同路径历史均无可用 baseline
+     Spec Coverage：Not verified（该移除项无法验证，不计 PASS）
+     一致性：记录设计偏差与建议
 
-     完整性
-     ✓ tasks.md 中的所有 8 个任务都已完成
-     ✓ 规范中的所有需求都有对应代码
-     ⚠ 场景"系统偏好检测"没有测试覆盖
-
-     正确性
-     ✓ 实现与规范意图匹配
-     ✓ 场景中的边缘情况已处理
-
-     一致性
-     ✓ 设计决策在代码结构中有体现
-     ⚠ 设计提到"CSS 变量"但实现使用了 Tailwind 类
-
-     总结
-     关键问题: 0 | 警告: 2 | 可以归档: 是（有警告）</code></pre>
+     总结：已执行检查未发现关键问题，但仍有未验证项。
+     不宣称全部通过或已可归档，不在此执行实现或归档。</code></pre>
       </div>
+      <div class="tip-box">缺失、不可读或只复述标题的 baseline 都是 <strong>Not verified</strong>，不是 PASS。自定义产物按 status 的路径和 Schema 指令读取，任务按 <code>apply.tracks</code> 聚合；未定义或有意跳过的检查为 <strong>Not applicable</strong>。仅移除/改名的变更，正确性中的实现映射与场景覆盖不适用，baseline 检查仍保留。verify 是建议性检查，不新增归档硬门槛。</div>
     </div>
 
     <div class="cmd-card" id="cmd-sync">
@@ -265,21 +310,28 @@ AI:  验证 add-dark-mode...
         <div class="cmd-name"><code>/opsx:sync</code></div>
         <div class="cmd-badge badge-core">core profile</div>
       </div>
-      <p class="cmd-desc">将 Delta 规范从变更合并到主规范。从 v1.3.1 起 sync 已纳入 core profile，可在归档前先同步规范；归档时也会提示同步。</p>
+      <p class="cmd-desc">将变更中的 Delta 合并到主规范，保留活跃变更。sync 属于 core 工作流，可在归档前提前同步规范。</p>
       <div class="cmd-syntax">
         <span class="syntax-label">语法</span>
         <code>/opsx:sync [变更名]</code>
       </div>
       <div class="table-wrapper">
         <table class="doc-table">
-          <thead><tr><th>场景</th><th>是否使用 sync？</th></tr></thead>
+          <thead><tr><th>操作</th><th>合并与已同步判定</th></tr></thead>
           <tbody>
-            <tr><td>长期变更，归档前想先将规范同步到主分支</td><td>是</td></tr>
-            <tr><td>多个并行变更需要最新的基础规范</td><td>是</td></tr>
-            <tr><td>快速变更，直接归档</td><td>否（归档会处理）</td></tr>
+            <tr><td><code>ADDED</code></td><td>加入新需求；主规范已含目标内容时 no-op。</td></tr>
+            <tr><td><code>MODIFIED</code></td><td>Delta 必须带完整需求正文与所有保留场景。合并描述、场景变化并保留未提及内容；目标内容已一致时 no-op，不能用片段替换整块而丢失场景。</td></tr>
+            <tr><td><code>REMOVED</code></td><td>删除整个需求；已消失时 no-op。最后一个需求的删除须满足 <code>retire_capabilities: true</code> 等退休条件，否则阻塞，不留下空规范。</td></tr>
+            <tr><td><code>RENAMED</code></td><td>FROM 改为 TO；TO 存在且 FROM 不存在时已同步。</td></tr>
           </tbody>
         </table>
       </div>
+      <ul class="styled-list">
+        <li><strong>输入与路径：</strong>只从 status 的 <code>artifactPaths.specs.existingOutputPaths</code> 读取 Delta，主规范写到 <code>planningHome.root/openspec/specs/</code>。没有 specs 产物或没有输出时，不从其他产物猜测。</li>
+        <li><strong>规则与验证：</strong>写入前读取当前 <code>openspec instructions specs --change &lt;name&gt; --json</code>；查询失败或 JSON 无效须停。合并后运行 <code>openspec validate --specs</code>，有阻塞、验证失败或内容未对齐时，不报告成功，也不得继续归档移动。</li>
+        <li><strong>保留 Delta：</strong>四种操作已全部同步时可 no-op，仍保留变更里的 Delta。新主规范只能从 ADDED 创建，缺失基准时不能凭空应用 MODIFIED/RENAMED。</li>
+      </ul>
+      <div class="tip-box">sync 是规范内容合并，不是 Git 同步，不执行 commit、push 或 pull。直接归档时，可经用户确认在同一会话 inline sync，不必另发 <code>/opsx:sync</code>。</div>
     </div>
 
     <div class="cmd-card" id="cmd-archive">
@@ -293,7 +345,7 @@ AI:  验证 add-dark-mode...
         <code>/opsx:archive [变更名]</code>
       </div>
       <div class="code-block">
-        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-header"><span>Claude Code 对话示意（非实测）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
         <pre><code>You: /opsx:archive
 
 AI:  归档 add-dark-mode...
@@ -304,16 +356,20 @@ AI:  归档 add-dark-mode...
      ✓ design.md 存在
      ✓ tasks.md 存在 (8/8 任务完成)
 
+     任务已打勾，但仍需检查产物、规范状态与归档目标。
      Delta 规范: 尚未同步
-     → 现在同步？(推荐)
+     → 在当前会话同步后归档？(推荐)
 
 You: 是
 
-AI:  ✓ 已将规范同步到 openspec/specs/ui/spec.md
+AI:  在同一会话 inline sync，等待完成，不另发命令或后台运行。
+     ✓ 已将规范同步到 openspec/specs/ui/spec.md
+     对照四种 Delta 操作并确认验证无阻塞后：
      ✓ 已移至 openspec/changes/archive/2026-03-10-add-dark-mode/
 
      变更归档成功。</code></pre>
       </div>
+      <div class="tip-box">任务全勾不等于可归档。未完成产物/任务先警告并询问；同步选择也由用户决定，可明确选择不同步。不得静默解决冲突。选定同步后，失败、验证阻塞或内容不匹配必须停归档，目标重名也不移动，不以“任务已完成”绕过。</div>
     </div>
 
     <div class="cmd-card" id="cmd-bulk-archive">
@@ -321,16 +377,16 @@ AI:  ✓ 已将规范同步到 openspec/specs/ui/spec.md
         <div class="cmd-name"><code>/opsx:bulk-archive</code></div>
         <div class="cmd-badge badge-expanded">扩展工作流</div>
       </div>
-      <p class="cmd-desc">批量归档多个已完成的变更。自动处理变更之间的规范冲突。</p>
+      <p class="cmd-desc">批量检查并归档多个变更。先调查同一 capability 路径上的冲突，展示实现证据、同步取舍与顺序，用户确认后才执行。</p>
       <div class="cmd-syntax">
         <span class="syntax-label">语法</span>
         <code>/opsx:bulk-archive [变更名...]</code>
       </div>
       <div class="code-block">
-        <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-header"><span>Claude Code 对话示意（非实测）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
         <pre><code>You: /opsx:bulk-archive
 
-AI:  找到 3 个已完成的变更:
+AI:  找到 3 个候选变更（复选框完成不等于可归档）:
      - add-dark-mode (8/8 任务完成)
      - fix-login-bug (3/3 任务完成)
      - update-footer (2/2 任务完成)
@@ -338,19 +394,19 @@ AI:  找到 3 个已完成的变更:
      检查规范冲突...
      ⚠ add-dark-mode 和 update-footer 都触及 specs/ui/
 
-     检查代码库以解决...
-     两个变更都已实现。将按时间顺序合并:
-     1. add-dark-mode (1月20日创建)
-     2. update-footer (1月22日创建)
+     先核对代码与测试，展示各 Delta 的证据。
+     建议仅在两者都已实现时按旧到新合并；未实现的 Delta 排除并警告。
+     请确认该取舍、顺序与归档范围；未确认前不改主规范。
 
-     归档所有 3 个变更？
+You: 确认方案，只归档检查通过的变更。
 
-You: 是
-
-AI:  ✓ 已归档 add-dark-mode
+AI:  先取得本批次全部所需 specs 指令，再在当前会话逐项 inline sync。
+     同步完成后对照确认纳入的 Delta，失败或未解决冲突的变更保留原位。
+     ✓ 已归档 add-dark-mode
      ✓ 已归档 fix-login-bug
      ✓ 已归档 update-footer</code></pre>
       </div>
+      <div class="tip-box">不能无询问自动解决冲突，也不能仅凭勾选或创建时间覆盖规范。按用户确认的每个 Delta 取舍同步；任何所需指令查询失败，在全批写入/移动前停止。执行中某项同步失败或验证阻塞，该变更不移动，记录 Failed；重名目标也不覆盖。报告成功、跳过、失败及仍未同步的 Delta。</div>
     </div>
 
     <div class="cmd-card" id="cmd-onboard">
@@ -376,19 +432,24 @@ AI:  ✓ 已归档 add-dark-mode
   </div>
 
   <!-- 不同 AI 工具的命令语法 -->
-  <div class="subsection">
-    <h3>不同 AI 工具的命令语法</h3>
+  <div class="subsection" id="tool-invocation">
+    <h3>不同 AI 工具的调用语法</h3>
+    <p>以下写法按当前 adapter 与 skill 引用转换核对。工具须已安装相应工作流；skills-only 不会生成命令文件。</p>
     <div class="table-wrapper">
       <table class="doc-table">
-        <thead><tr><th>工具</th><th>语法示例</th></tr></thead>
+        <thead><tr><th>工具</th><th>调用示例</th><th>生成位置</th></tr></thead>
         <tbody>
-          <tr><td>Claude Code</td><td><code>/opsx:propose</code>、<code>/opsx:apply</code></td></tr>
-          <tr><td>Cursor</td><td><code>/opsx-propose</code>、<code>/opsx-apply</code></td></tr>
-          <tr><td>Windsurf</td><td><code>/opsx-propose</code>、<code>/opsx-apply</code></td></tr>
-          <tr><td>Copilot (IDE)</td><td><code>/opsx-propose</code>、<code>/opsx-apply</code></td></tr>
-          <tr><td>Trae</td><td><code>/openspec-propose</code>、<code>/openspec-apply-change</code></td></tr>
+          <tr><td>Claude Code</td><td><code>/opsx:propose</code>、<code>/opsx:apply</code></td><td><code>.claude/commands/opsx/</code></td></tr>
+          <tr><td>Cursor</td><td><code>/opsx-propose</code>、<code>/opsx-apply</code></td><td><code>.cursor/commands/opsx-*.md</code></td></tr>
+          <tr><td>Devin Desktop（原 Windsurf）</td><td><code>/opsx-propose</code>、<code>/opsx-apply</code></td><td><code>.devin/workflows/opsx-*.md</code>；<code>windsurf</code> 是 <code>devin</code> 的工具 ID 别名。</td></tr>
+          <tr><td>GitHub Copilot（IDE）</td><td><code>/opsx-propose</code>、<code>/opsx-apply</code></td><td><code>.github/prompts/opsx-*.prompt.md</code></td></tr>
+          <tr><td>Amazon Q Developer</td><td><code>@opsx-propose</code>、<code>@opsx-apply</code></td><td><code>.amazonq/prompts/opsx-*.md</code>，prompt library 而非 slash 命令。</td></tr>
+          <tr><td>Codex（skills-only）</td><td><code>$openspec-propose</code>、<code>$openspec-apply-change</code></td><td><code>.agents/skills/openspec-*/SKILL.md</code>；旧 <code>~/.codex/prompts</code> 已废弃，不再生成。</td></tr>
+          <tr><td>Kimi Code</td><td><code>/skill:openspec-propose</code>、<code>/skill:openspec-apply-change</code></td><td><code>.kimi-code/skills/</code>，skills-only。</td></tr>
+          <tr><td>Trae</td><td>命令：<code>/opsx-propose</code>、<code>/opsx-apply</code><br>仅 skills：<code>/openspec-propose</code>、<code>/openspec-apply-change</code></td><td>当前 adapter 写入 <code>.trae/commands/opsx-*.md</code>；skills 位于 <code>.trae/skills/</code>。</td></tr>
         </tbody>
       </table>
     </div>
+    <div class="tip-box">调用语法不等于工作流授权：生成规划后先审查，再明确授权 apply；apply 完成不自动执行 verify。终端 <code>openspec update</code> 只刷新集成，不替代对话中的规划修订。</div>
   </div>
 </section>

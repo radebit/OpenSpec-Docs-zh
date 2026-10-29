@@ -15,7 +15,7 @@
   --accent-3: #06b6d4;
   --text-primary: #e2e8f0;
   --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-muted: #8493ab;
   --code-bg: #0d1526;
   --code-border: rgba(99, 102, 241, 0.2);
   --success: #10b981;
@@ -130,7 +130,8 @@ body {
   gap: 0.4rem;
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link.active {
   color: var(--text-primary);
   background: rgba(99, 102, 241, 0.1);
 }
@@ -265,10 +266,12 @@ body {
 
 .sidebar-link code {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.78rem;
-  background: none;
-  padding: 0;
-  color: inherit;
+  font-size: 0.82em;
+  color: var(--accent-3);
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
 }
 
 .sidebar-link-sub {
@@ -839,6 +842,12 @@ body {
   border-color: rgba(6, 182, 212, 0.2);
 }
 
+.info-box > div:not(.info-icon),
+.sp-item > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .info-icon {
   font-size: 1.25rem;
   flex-shrink: 0;
@@ -854,6 +863,10 @@ body {
   color: var(--text-primary);
   display: block;
   margin-bottom: 0.25rem;
+}
+
+.info-box strong + br {
+  display: none;
 }
 
 .info-box code {
@@ -934,6 +947,7 @@ body {
 
 .step-content {
   flex: 1;
+  min-width: 0;
   padding-top: 0.5rem;
 }
 
@@ -1318,6 +1332,31 @@ body {
   white-space: nowrap;
 }
 
+.main-content a:not([class]) {
+  color: var(--accent-3);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.main-content a:not([class]):hover {
+  color: var(--text-primary);
+}
+
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--accent-3);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.accordion-header:focus-visible,
+.faq-question:focus-visible {
+  outline-offset: -3px;
+}
+
 /* ==========================================
    命令参考样式
    ========================================== */
@@ -1346,7 +1385,7 @@ body {
 
 .qr-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: 0.5rem;
 }
 
@@ -1379,6 +1418,14 @@ body {
   font-size: 0.8rem;
   color: var(--text-muted);
   line-height: 1.4;
+}
+
+@media (max-width: 480px) {
+  .qr-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
 }
 
 .cmd-list {
@@ -1502,12 +1549,45 @@ body {
   padding: 1rem 1.25rem;
 }
 
+.main-content ul:not([class]),
+.main-content ol:not([class]) {
+  margin: 0.75rem 0 1rem;
+  padding-left: 1.25rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.main-content ul:not([class]) > li + li,
+.main-content ol:not([class]) > li + li {
+  margin-top: 0.35rem;
+}
+
+.main-content .cli-cmd-body > ul:not([class]) {
+  list-style: none;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.main-content .cli-cmd-body > ul:not([class]) > li {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.main-content .cli-cmd-body > ul:not([class]) > li + li {
+  border-top: 1px solid var(--border);
+}
+
 /* ==========================================
    工作流模式
    ========================================== */
 .workflow-modes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 1.5rem;
   margin-bottom: 2.5rem;
 }
@@ -1696,21 +1776,20 @@ body {
 }
 
 .styled-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.4rem 0;
+  position: relative;
+  padding: 0.4rem 0 0.4rem 1.5rem;
   font-size: 0.9rem;
   color: var(--text-secondary);
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .styled-list li::before {
   content: '→';
+  position: absolute;
+  left: 0;
   color: var(--accent);
   font-weight: 600;
-  flex-shrink: 0;
-  margin-top: 0.1rem;
 }
 
 .styled-list code {
@@ -1807,7 +1886,7 @@ body {
 /* ==========================================
    代码内联
    ========================================== */
-:not(.code-block) code:not(.cmd-name code):not(.cmd-syntax code):not(.cli-cmd-header code) {
+code:not(.code-block code):not(.sidebar-link code):not(.cmd-name code):not(.cmd-syntax code):not(.cli-cmd-header code) {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.82em;
   color: var(--accent-3);

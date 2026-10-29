@@ -3,7 +3,7 @@
   <div class="section-header">
     <span class="section-tag">工作流</span>
     <h2>常见工作流模式</h2>
-    <p>选择最适合你当前场景的工作流模式</p>
+    <p>按场景选择工作流。此页 <code>/opsx:</code> 调用示意使用 Claude Code 写法，其他工具见<a href="#tool-invocation">调用方式</a>。</p>
   </div>
 
   <div class="workflow-modes">
@@ -18,7 +18,7 @@
         <span>→</span>
         <code>/opsx:archive</code>
       </div>
-      <p>新安装默认使用 core，包含：propose、explore、apply、sync、archive</p>
+      <p>新安装默认 core：propose、explore、apply、update、sync、archive，共六个工作流。规划生成后先审查，再授权 apply；任务完成不自动 verify 或归档。</p>
     </div>
     <div class="wf-mode">
       <div class="wf-mode-title">扩展工作流（自定义选择）</div>
@@ -38,6 +38,7 @@
         <pre><code>openspec config profile
 openspec update</code></pre>
       </div>
+      <p>new、continue、ff、verify、bulk-archive、onboard 需在 custom profile 中启用，再运行终端 <code>openspec update</code> 刷新集成。</p>
     </div>
   </div>
 
@@ -67,7 +68,14 @@ openspec update</code></pre>
       <div class="wf-flow-compact">
         变更 A 进行中时 → 切换上下文 → 同时处理变更 B → <code>/opsx:bulk-archive</code>
       </div>
-      <p class="wf-use-when">适用于：并行工作流、紧急中断、团队协作</p>
+      <p class="wf-use-when">适用于：并行工作流、紧急中断、团队协作。批量归档先展示冲突方案并确认，不凭任务全勾自动归档。</p>
+    </div>
+    <div class="wf-pattern">
+      <div class="wf-pattern-title">原地规划修订（已有变更）</div>
+      <div class="wf-flow-compact">
+        发现规划矛盾 → <code>/opsx:update</code> → 逐项确认修订 → 审查 → 另行授权 <code>/opsx:apply</code>
+      </div>
+      <p class="wf-use-when">只修订现有规划，不写实现代码、不重建、不重置已勾任务。部分 glob 的缺失 capability 可确认后补齐；完全缺失产物另行创建。终端 <code>openspec update</code> 是刷新集成，不是此路径。</p>
     </div>
   </div>
 
@@ -104,14 +112,14 @@ openspec update</code></pre>
         <div class="bp-num">02</div>
         <div class="bp-content">
           <h4>需求不明确时使用 explore</h4>
-          <p>在提交变更前先探索问题空间，探索可以澄清思路，避免错误方向带来的返工。</p>
+          <p>默认只研究；明确授权后可在当前探索中捕获指定规划产物。捕获规划不授权实现，自定义 Schema 不创建其未定义的文件。</p>
         </div>
       </div>
       <div class="bp-item">
         <div class="bp-num">03</div>
         <div class="bp-content">
           <h4>归档前先 verify</h4>
-          <p>使用 <code>/opsx:verify</code> 检查实现是否与产物匹配，在关闭变更前捕获不匹配问题。</p>
+          <p>启用扩展 <code>/opsx:verify</code> 后检查实现与产物。缺少适用证据或 baseline 就是未验证，不计 PASS；这是建议性检查，不新增归档硬门槛。</p>
         </div>
       </div>
       <div class="bp-item">
@@ -146,35 +154,51 @@ openspec update</code></pre>
 
   <div class="subsection" id="customization-config">
     <h3>项目配置（openspec/config.yaml）</h3>
-    <p>最简单的自定义方式，让你可以：</p>
+    <p>用项目配置保存默认 Schema、持久约束与文档指针，不把代码库快照塞进 context。</p>
     <ul class="styled-list">
-      <li>设置默认 Schema — 跳过每个命令的 <code>--schema</code></li>
-      <li>注入项目上下文 — AI 了解你的技术栈、约定等</li>
-      <li>添加每产物规则 — 特定产物的自定义指导</li>
+      <li><strong>schema：</strong>设置默认工作流，省去每次传入 <code>--schema</code>。</li>
+      <li><strong>context：</strong>所有产物的共同项目约束；apply/archive 执行时也读取当前值。代码事实按需查源码，项目说明放文档并保留指针。</li>
+      <li><strong>rules：</strong>以 artifact ID 为键的字符串数组，只约束对应产物内容，不是执行步骤。</li>
+      <li><strong>operations：</strong>只支持 <code>apply</code>、<code>archive</code> 的 <code>guidance</code> 字符串数组，提供执行建议，不改变产物规则或 CLI 状态。</li>
     </ul>
     <div class="code-block">
       <div class="code-header"><span>openspec/config.yaml</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
       <pre><code>schema: spec-driven
 
 context: |
-  技术栈: TypeScript, React, Node.js, PostgreSQL
-  API 风格: RESTful，文档在 docs/api.md
-  测试: Jest + React Testing Library
-  我们重视所有公共 API 的向后兼容性
+  公共 API 必须保持向后兼容，破坏性变更需明确批准。
+  项目架构见 docs/architecture.md，API 约定见 docs/api.md。
+  测试与开发约定见 CONTRIBUTING.md，代码事实按需读取源码。
 
 rules:
   proposal:
     - 包含回滚计划
     - 确认受影响的团队
   specs:
-    - 使用 Given/When/Then 格式
-    - 在发明新模式之前引用现有模式</code></pre>
+    - 使用 Requirement 和 Scenario 结构标题
+    - 在发明新模式之前引用现有模式
+
+operations:
+  apply:
+    guidance:
+      - 先运行相关测试，再运行全量测试
+  archive:
+    guidance:
+      - 保持完成总结简短</code></pre>
     </div>
+    <div class="tip-box">示例中的文档路径需换成项目实际路径。执行时 <code>context</code> 与 <code>operationGuidance</code> 分开返回；建议与内置流程、用户选择或 CLI 控制值冲突时不执行并说明，不能据此跳过 blocked 状态或证明任务完成。除非另有授权，不把这些文本复制进产物或代码。</div>
+    <p><strong>遗留 <code>openspec/project.md</code>：</strong>先人工 review，将持久约束和文档指针迁入 <code>config.yaml</code>，项目说明留在项目文档。init/update 不自动迁移或删除该文件，核对后再决定保留或移除。</p>
   </div>
 
   <div class="subsection" id="customization-schema">
     <h3>自定义 Schema</h3>
-    <p>当项目配置不够用时，创建完全自定义的工作流 Schema。</p>
+    <p>自定义 Schema 定义产物、模板和依赖。工作流必须跟随当前指令，不假定固定的 proposal/specs/design/tasks 文件。</p>
+    <ul class="styled-list">
+      <li><strong>声明顺序：</strong><code>requires</code> 决定哪个产物可创建；多个产物同时 ready 时，按 <code>artifacts</code> 声明顺序选择。</li>
+      <li><strong>apply.requires：</strong>只能引用已声明的 artifact ID。非法 ID 在加载 Schema 时即报错，不再静默跳过。</li>
+      <li><strong>instruction：</strong>每次读取当前 <code>openspec instructions &lt;artifact-id&gt; --change &lt;name&gt; --json</code>，遵循指令、模板和依赖；指令委托 skill/command 时也须遵守已核对的输出路径。</li>
+      <li><strong>apply.tracks：</strong>是文件路径，可用 glob，不是 artifact ID。建议与某产物的 <code>generates</code> 完全一致；不一致时 schema validate 警告，apply 仍读取该路径，list/status 的进度可能回退到 tasks.md。</li>
+    </ul>
 
     <div class="code-block">
       <div class="code-header"><span>bash — Fork 现有 Schema</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
@@ -223,8 +247,15 @@ openspec schema fork spec-driven with-review
       基于设计创建审查清单。
       包含安全、性能和测试注意事项。
     requires:
-      - design</code></pre>
+      - design
+
+# 在已有 tasks 的 requires 中补入 review，保留其他配置:
+# requires: [specs, design, review]
+
+# 添加 templates/review.md 后，核对模板、引用及依赖图
+openspec schema validate with-review</code></pre>
     </div>
+    <div class="tip-box">review 片段放进 <code>artifacts</code> 列表，并添加它引用的模板。只加 review 而不把它接入 tasks/apply 依赖链，不会阻止实现。默认 tasks 同时依赖 specs 与 design，补 review 时不能丢掉原依赖。</div>
   </div>
 </section>
 
@@ -233,39 +264,85 @@ openspec schema fork spec-driven with-review
   <div class="section-header">
     <span class="section-tag">集成</span>
     <h2>支持的 AI 工具</h2>
-    <p>OpenSpec 与 30+ AI 编码助手集成，运行 openspec init 时自动配置</p>
+    <p>当前 <code>AI_TOOLS</code> 注册 50 项（含通用目标），以下列出名称与 <code>--tools</code> ID。运行 <code>openspec init</code> 选择并配置；不是所有工具都有命令 adapter。</p>
   </div>
 
   <div class="tools-grid">
-    <div class="tool-card">Claude Code</div>
-    <div class="tool-card">Cursor</div>
-    <div class="tool-card">Windsurf</div>
-    <div class="tool-card">GitHub Copilot</div>
-    <div class="tool-card">Kiro</div>
-    <div class="tool-card">Cline</div>
-    <div class="tool-card">RooCode</div>
-    <div class="tool-card">Continue</div>
-    <div class="tool-card">Qoder</div>
-    <div class="tool-card">Gemini CLI</div>
-    <div class="tool-card">OpenCode</div>
-    <div class="tool-card">Amazon Q</div>
-    <div class="tool-card">Trae</div>
-    <div class="tool-card">Codex</div>
-    <div class="tool-card">Pi</div>
-    <div class="tool-card">Factory Droid</div>
-    <div class="tool-card">Auggie</div>
-    <div class="tool-card">CoStrict</div>
-    <div class="tool-card">Crush</div>
-    <div class="tool-card">iFlow</div>
-    <div class="tool-card">Kilo Code</div>
-    <div class="tool-card">Qwen Code</div>
-    <div class="tool-card">Antigravity</div>
-    <div class="tool-card">CodeBuddy</div>
-    <div class="tool-card">IBM Bob Shell</div>
-    <div class="tool-card">ForgeCode</div>
-    <div class="tool-card">Junie</div>
-    <div class="tool-card">Kimi CLI</div>
-    <div class="tool-card">Lingma（通义灵码）</div>
+    <div class="tool-card">Amazon Q Developer<br><code>amazon-q</code></div>
+    <div class="tool-card">Amp<br><code>amp</code></div>
+    <div class="tool-card">Antigravity<br><code>antigravity</code></div>
+    <div class="tool-card">AtomCode<br><code>atomcode</code></div>
+    <div class="tool-card">Auggie (Augment CLI)<br><code>auggie</code></div>
+    <div class="tool-card">IBM Bob<br><code>bob</code></div>
+    <div class="tool-card">Claude Code<br><code>claude</code></div>
+    <div class="tool-card">Cline<br><code>cline</code></div>
+    <div class="tool-card">Command Code<br><code>command-code</code></div>
+    <div class="tool-card">CodeArts<br><code>codeartsagent</code></div>
+    <div class="tool-card">Codex<br><code>codex</code></div>
+    <div class="tool-card">DeepSeek Harness<br><code>dsh</code></div>
+    <div class="tool-card">Devin Desktop (formerly Windsurf)<br><code>devin</code></div>
+    <div class="tool-card">ForgeCode<br><code>forgecode</code></div>
+    <div class="tool-card">CodeBuddy Code (CLI)<br><code>codebuddy</code></div>
+    <div class="tool-card">Code Studio<br><code>codestudio</code></div>
+    <div class="tool-card">Continue<br><code>continue</code></div>
+    <div class="tool-card">CoStrict<br><code>costrict</code></div>
+    <div class="tool-card">Crush<br><code>crush</code></div>
+    <div class="tool-card">Cursor<br><code>cursor</code></div>
+    <div class="tool-card">EasyCode<br><code>easycode</code></div>
+    <div class="tool-card">Factory Droid<br><code>factory</code></div>
+    <div class="tool-card">Gemini CLI<br><code>gemini</code></div>
+    <div class="tool-card">GitHub Copilot<br><code>github-copilot</code></div>
+    <div class="tool-card">GigaCode<br><code>gigacode</code></div>
+    <div class="tool-card">Grok Build<br><code>grok</code></div>
+    <div class="tool-card">GSD<br><code>gsd</code></div>
+    <div class="tool-card">Hermes Agent<br><code>hermes</code></div>
+    <div class="tool-card">iFlow<br><code>iflow</code></div>
+    <div class="tool-card">Junie<br><code>junie</code></div>
+    <div class="tool-card">Kilo Code<br><code>kilocode</code></div>
+    <div class="tool-card">Kimi Code<br><code>kimi</code></div>
+    <div class="tool-card">Kiro<br><code>kiro</code></div>
+    <div class="tool-card">Lingma<br><code>lingma</code></div>
+    <div class="tool-card">MiniMax Code<br><code>minimax-code</code></div>
+    <div class="tool-card">Mistral Vibe<br><code>vibe</code></div>
+    <div class="tool-card">Oh My Pi<br><code>oh-my-pi</code></div>
+    <div class="tool-card">OpenCode<br><code>opencode</code></div>
+    <div class="tool-card">Pi<br><code>pi</code></div>
+    <div class="tool-card">SourceCraft Code Assistant<br><code>codeassistant</code></div>
+    <div class="tool-card">Qoder<br><code>qoder</code></div>
+    <div class="tool-card">Qwen Code<br><code>qwen</code></div>
+    <div class="tool-card">Rovo Dev CLI<br><code>rovodev</code></div>
+    <div class="tool-card">Zoo Code<br><code>roocode</code></div>
+    <div class="tool-card">Trae<br><code>trae</code></div>
+    <div class="tool-card">Veai<br><code>veai</code></div>
+    <div class="tool-card">Warp<br><code>warp</code></div>
+    <div class="tool-card">Zed Agent<br><code>zed</code></div>
+    <div class="tool-card">ZCode<br><code>zcode</code></div>
+    <div class="tool-card">Other / Universal (shared .agents skills)<br><code>agents</code></div>
+  </div>
+  <div class="tip-box"><code>windsurf</code> 是 <code>devin</code> 的兼容别名，不重复计入 50 项。<code>agents</code> 为未列出的助手提供共享 skills，不生成 <code>AGENTS.md</code>。</div>
+
+  <div class="subsection">
+    <h3>集成路径与注意事项</h3>
+    <div class="table-wrapper">
+      <table class="doc-table">
+        <thead><tr><th>工具</th><th>当前路径与注意事项</th></tr></thead>
+        <tbody>
+          <tr><td>Codex</td><td>skills-only：<code>.agents/skills/</code>。</td></tr>
+          <tr><td>Antigravity</td><td>skills：<code>.agents/skills/</code>；命令：<code>.agents/workflows/opsx-*.md</code>。</td></tr>
+          <tr><td>Kilo Code</td><td>命令：<code>.kilo/command/opsx-*.md</code>；skills：<code>.kilocode/skills/</code>。</td></tr>
+          <tr><td>GitHub Copilot cloud</td><td>显式 opt-in：<code>openspec init --tools github-copilot --copilot-cloud</code>，记入 <code>githubCopilot.cloudAgent</code>。生成 <code>.github/workflows/copilot-setup-steps.yml</code> 与 <code>.github/agents/openspec.agent.md</code>，不生成 <code>AGENTS.md</code>；IDE 集成无需此选项。</td></tr>
+          <tr><td>MiniMax Code</td><td>全局 skills-only：<code>~/.minimax/skills/</code>，不是项目目录。安装与刷新会影响其他项目共享的 skills。</td></tr>
+          <tr><td>Hermes Agent</td><td>生成到项目 <code>.hermes/skills/</code>。Hermes 默认只读 <code>~/.hermes/skills</code>，需在 <code>~/.hermes/config.yaml</code> 的 <code>skills.external_dirs</code> 加入该项目 skills 的绝对路径。</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span>Hermes 配置示意（替换项目绝对路径）</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>skills:
+  external_dirs:
+    - /absolute/path/to/project/.hermes/skills</code></pre>
+    </div>
+    <div class="tip-box">升级前备份自定义内容，使用终端 <code>openspec update --dry-run</code>（可加 <code>--json</code>）检查计划，再运行 update。具体旧生成文件可能整体删除，不能把所有清理项都当成只移除托管区块。</div>
   </div>
 
   <div class="subsection">
@@ -293,8 +370,8 @@ openspec init --profile core</code></pre>
       <table class="doc-table">
         <thead><tr><th>Profile</th><th>包含的工作流</th></tr></thead>
         <tbody>
-          <tr><td><strong>Core（默认）</strong></td><td>propose、explore、apply、sync、archive</td></tr>
-          <tr><td><strong>Custom（自定义）</strong></td><td>可选择：propose、explore、new、continue、apply、ff、sync、archive、bulk-archive、verify、onboard 的任意子集</td></tr>
+          <tr><td><strong>Core（默认）</strong></td><td>propose、explore、apply、update、sync、archive，共六个</td></tr>
+          <tr><td><strong>Custom（自定义）</strong></td><td>propose、explore、new、continue、apply、update、ff、sync、archive、bulk-archive、verify、onboard 中选择；选 archive/bulk-archive 会补入 sync 依赖。</td></tr>
         </tbody>
       </table>
     </div>
@@ -311,17 +388,16 @@ openspec init --profile core</code></pre>
 
   <div class="subsection">
     <h3>快速配置</h3>
-    <p>在 <code>openspec/config.yaml</code> 中添加语言指令即可：</p>
+    <p>新项目在终端用 <code>openspec init --language "中文（简体）"</code>。已有配置不会被该选项覆盖，需编辑 <code>openspec/config.yaml</code> 的 context，保留其他约束。</p>
+    <div class="tip-box">正文可用中文，OpenSpec 结构 header（如 Requirement、Scenario）与 SHALL/MUST 关键词保持英文。结构标题是解析锚点，不能随正文一起翻译。</div>
     <div class="code-block">
       <div class="code-header"><span>中文（简体）配置示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
       <pre><code>schema: spec-driven
 
 context: |
-  语言：中文（简体）
-  所有产出物必须用简体中文撰写。
-
-  # 你的其他项目上下文在下面...
-  技术栈: TypeScript, React, Node.js</code></pre>
+  正文使用简体中文，结构标题与 SHALL/MUST 关键词保持英文。
+  保留公共 API 向后兼容性。
+  项目约定见 docs/architecture.md（换成项目实际文档路径）。</code></pre>
     </div>
 
     <div class="install-tabs" style="margin-top:1.5rem">
@@ -335,8 +411,8 @@ context: |
       <div class="code-block">
         <div class="code-header"><span>config.yaml</span></div>
         <pre><code>context: |
-  语言：中文（简体）
-  所有产出物必须用简体中文撰写。</code></pre>
+  正文使用简体中文。
+  OpenSpec 结构标题与 SHALL/MUST 关键词保持英文。</code></pre>
       </div>
     </div>
     <div class="tab-content" data-content="pt">
@@ -344,7 +420,8 @@ context: |
         <div class="code-header"><span>config.yaml</span></div>
         <pre><code>context: |
   Language: Portuguese (pt-BR)
-  All artifacts must be written in Brazilian Portuguese.</code></pre>
+  Write artifact prose in Brazilian Portuguese.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.</code></pre>
       </div>
     </div>
     <div class="tab-content" data-content="es">
@@ -352,7 +429,8 @@ context: |
         <div class="code-header"><span>config.yaml</span></div>
         <pre><code>context: |
   Idioma: Español
-  Todos los artefactos deben escribirse en español.</code></pre>
+  Escribe el texto de los artefactos en español.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.</code></pre>
       </div>
     </div>
     <div class="tab-content" data-content="ja">
@@ -360,7 +438,8 @@ context: |
         <div class="code-header"><span>config.yaml</span></div>
         <pre><code>context: |
   言語：日本語
-  すべての成果物は日本語で作成してください。</code></pre>
+  成果物の本文は日本語で作成してください。
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.</code></pre>
       </div>
     </div>
     <div class="tab-content" data-content="fr">
@@ -368,7 +447,8 @@ context: |
         <div class="code-header"><span>config.yaml</span></div>
         <pre><code>context: |
   Langue : Français
-  Tous les artefacts doivent être rédigés en français.</code></pre>
+  Rédigez le texte des artefacts en français.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.</code></pre>
       </div>
     </div>
   </div>
@@ -431,12 +511,22 @@ type(scope): subject</code></pre>
   <!-- 遥测 -->
   <div class="subsection">
     <h3>遥测数据</h3>
-    <p>OpenSpec 收集匿名使用统计数据。我们只收集命令名称和版本以了解使用模式。不收集参数、路径、内容或个人信息。在 CI 中自动禁用。</p>
+    <p>匿名遥测默认采用 opt-out：未配置时启用，首次披露提示展示前不发送数据。事件只含命令名、版本等固定字段与随机匿名 ID，不含参数、路径或内容。</p>
+    <ul class="styled-list">
+      <li><strong>全局关闭：</strong><code>openspec config set telemetry.enabled false</code> 禁用遥测与联网版本检查，设置写入全局配置，不是项目 config.yaml。</li>
+      <li><strong>优先级：</strong>环境变量 opt-out 与 CI 优先于全局配置，不能用 enabled=true 覆盖。全局配置无法读取时也不发送。</li>
+      <li><strong>首次披露：</strong><code>--json</code> 延后提示，不设置 noticeSeen；未展示提示前不创建匿名 ID，也不发送遥测。后续非 JSON 调用才展示。</li>
+      <li><strong>Tab 补全：</strong><code>openspec __complete</code> 不记录遥测，不消耗首次披露提示。</li>
+    </ul>
     <div class="code-block">
-      <div class="code-header"><span>bash — 禁用遥测</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
-      <pre><code>export OPENSPEC_TELEMETRY=0
+      <div class="code-header"><span>终端 — 禁用遥测与版本检查</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>openspec config set telemetry.enabled false
+
+# 或使用环境变量
+export OPENSPEC_TELEMETRY=0
 # 或
 export DO_NOT_TRACK=1</code></pre>
     </div>
+    <div class="tip-box">环境值忽略大小写与首尾空格：<code>OPENSPEC_TELEMETRY</code> 只有 1/true/yes/on 表示不主动关闭；<code>DO_NOT_TRACK</code> 除空值、0/false/no/off 外均关闭。两者任一要求关闭就关闭，开启值不会覆盖其他 opt-out。</div>
   </div>
 </section>

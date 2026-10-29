@@ -10,12 +10,14 @@
     <table class="doc-table">
       <thead><tr><th>分类</th><th>命令</th><th>用途</th></tr></thead>
       <tbody>
-        <tr><td><strong>设置</strong></td><td><code>init</code>、<code>update</code></td><td>初始化和更新项目中的 OpenSpec</td></tr>
-        <tr><td><strong>工作区（Beta）</strong></td><td><code>workspace setup</code>、<code>workspace list</code>、<code>workspace link</code>、<code>workspace relink</code>、<code>workspace doctor</code>、<code>workspace open</code></td><td>跨仓库或文件夹的协作工作区规划</td></tr>
+        <tr><td><strong>设置</strong></td><td><code>init</code>、<code>update</code>、<code>version</code>、<code>install</code></td><td>初始化项目、刷新指令和升级 CLI</td></tr>
+        <tr><td><a href="#cli-store"><strong>Store</strong></a></td><td><code>store setup/register/unregister/remove/list/doctor</code></td><td>创建和登记独立的 OpenSpec 规划仓库</td></tr>
+        <tr><td><a href="#cli-context"><strong>诊断与上下文</strong></a></td><td><code>doctor</code>、<code>context</code></td><td>检查关联根目录并输出工作上下文</td></tr>
+        <tr><td><a href="#cli-workset"><strong>Workset</strong></a></td><td><code>workset create/list/open/remove</code></td><td>保存和打开个人本机工作视图</td></tr>
         <tr><td><strong>浏览</strong></td><td><code>list</code>、<code>view</code>、<code>show</code></td><td>探索变更和规范</td></tr>
         <tr><td><strong>验证</strong></td><td><code>validate</code></td><td>检查变更和规范的问题</td></tr>
         <tr><td><strong>生命周期</strong></td><td><code>archive</code></td><td>完成已完成的变更</td></tr>
-        <tr><td><strong>工作流</strong></td><td><code>status</code>、<code>instructions</code>、<code>templates</code>、<code>schemas</code></td><td>产物驱动的工作流支持</td></tr>
+        <tr><td><strong>工作流</strong></td><td><code>new change</code>、<code>status</code>、<code>instructions</code>、<code>templates</code>、<code>schemas</code></td><td>产物驱动的工作流支持</td></tr>
         <tr><td><strong>Schema</strong></td><td><code>schema init</code>、<code>schema fork</code>、<code>schema validate</code>、<code>schema which</code></td><td>创建和管理自定义工作流</td></tr>
         <tr><td><strong>配置</strong></td><td><code>config</code></td><td>查看和修改设置</td></tr>
         <tr><td><strong>工具</strong></td><td><code>feedback</code>、<code>completion</code></td><td>反馈和 Shell 集成</td></tr>
@@ -42,25 +44,30 @@
             <thead><tr><th>选项</th><th>描述</th></tr></thead>
             <tbody>
               <tr><td><code>--tools &lt;list&gt;</code></td><td>非交互式配置 AI 工具。使用 all、none 或逗号分隔的列表</td></tr>
-              <tr><td><code>--force</code></td><td>自动清理旧文件，无需提示</td></tr>
+              <tr><td><code>--language &lt;language&gt;</code></td><td>设置新规划产物的语言，例如 <code>简体中文</code></td></tr>
+              <tr><td><code>--force</code></td><td>自动清理旧文件，无需提示；非交互式初始化也会自动清理旧产物</td></tr>
               <tr><td><code>--profile &lt;profile&gt;</code></td><td>覆盖此次初始化的全局 profile（core 或 custom）</td></tr>
+              <tr><td><code>--no-animation</code></td><td>显示静态欢迎界面</td></tr>
+              <tr><td><code>--copilot-cloud</code></td><td>选中 <code>github-copilot</code> 时，明确启用 GitHub 托管 coding agent 文件</td></tr>
+              <tr><td><code>--no-copilot-cloud</code></td><td>关闭并保存云端集成设置，删除已有托管云端文件；不禁用编辑器中的 Copilot</td></tr>
             </tbody>
           </table>
         </div>
         <div class="code-block">
           <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
-          <pre><code># 交互式初始化
-openspec init
+          <pre><code># 交互式初始化，设置规划语言
+openspec init --language '简体中文'
 
 # 非交互式：配置 Claude 和 Cursor
-openspec init --tools claude,cursor
+openspec init --tools claude,cursor --language '简体中文' --no-animation
 
-# 配置所有支持的工具
-openspec init --tools all
+# 配置所有支持的工具，跳过 Copilot 云端文件
+openspec init --tools all --no-copilot-cloud
 
 # 覆盖 profile
 openspec init --profile core</code></pre>
         </div>
+        <p><strong>Copilot 云端 opt-in：</strong>首次交互默认不启用；无交互且无既有选择时跳过。已有配置或托管文件会延续选择。启用后生成 <code>.github/workflows/copilot-setup-steps.yml</code> 和 <code>.github/agents/openspec.agent.md</code>。</p>
       </div>
     </div>
 
@@ -72,151 +79,266 @@ openspec init --profile core</code></pre>
       <div class="cli-cmd-body">
         <div class="code-block">
           <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
-          <pre><code># npm 升级后更新指令文件
-npm update @fission-ai/openspec
-openspec update</code></pre>
+          <pre><code># 先升级 CLI（npm 安装方式）
+npm install -g @fission-ai/openspec@latest
+
+# 在项目内审查更新计划，再写入
+openspec update --dry-run
+openspec update
+
+# 供脚本读取计划
+openspec update --dry-run --json</code></pre>
+        </div>
+        <p><strong>语法：</strong><code>openspec update [path] [--force] [--dry-run] [--json]</code>。<code>--force</code> 强制刷新，即使工具已是当前版本。</p>
+        <p><strong>--dry-run：</strong>不写项目文件、不检查网络升级。计划列出 <code>changes</code>、<code>notes</code>、<code>failures</code>，执行前先检查失败项。</p>
+        <p><strong>--json：</strong>仅可与 <code>--dry-run</code> 同用，单独使用会报错。</p>
+        <div class="tip-box"><strong>手改内容：</strong>update 会重写工具生成的技能和命令文件，也可能清理旧文件。不要依赖手改保留，先审查计划并备份。</div>
+      </div>
+    </div>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec version / install</code>
+        <span class="cli-desc">检查版本或安装独立二进制</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec version [--check] [--json]
+openspec install [version]</code></pre>
+        </div>
+        <ul>
+          <li><code>version</code>：显示版本和安装来源；<code>--check</code> 检查新版本，<code>--json</code> 输出结构化报告。</li>
+          <li><code>install</code>：安装免 Node.js 的独立二进制，默认最新完整发布版；传入 <code>v1.15.0</code> 可锁定版本。</li>
+          <li><strong>PATH：</strong>切换安装方式不会自动卸载旧副本。按输出提示手动处理旧安装，再打开新终端运行 <code>openspec version</code> 确认实际来源。</li>
+        </ul>
+        <p>安装方式和默认路径见<a href="#installation">安装指南</a>。这些安装命令会写入项目外目录，先取得用户同意。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Store 命令 -->
+  <div class="subsection" id="cli-store">
+    <h3>Store 命令</h3>
+    <p>Store 是独立的 OpenSpec 规划仓库。本机登记只负责将 Store ID 解析为本地路径。</p>
+    <p><strong>选择规划根：</strong>对变更操作使用普通命令加 <code>--store &lt;id&gt;</code>，不要写成 <code>openspec store new</code>。路径须先登记，不支持 <code>--store-path</code>。详见<a href="#concepts">核心概念</a>。</p>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec store setup</code>
+        <span class="cli-desc">创建并登记本地 Store</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec store setup [id] [--path &lt;path&gt;] [--init-git | --no-init-git] [--remote &lt;url&gt;] [--json]</code></pre>
+        </div>
+        <div class="table-wrapper">
+          <table class="doc-table">
+            <thead><tr><th>参数</th><th>描述</th></tr></thead>
+            <tbody>
+              <tr><td><code>id</code>、<code>--path &lt;path&gt;</code></td><td>kebab-case 名称和目录。交互式会询问；无交互或 <code>--json</code> 时两者必填</td></tr>
+              <tr><td><code>--init-git</code></td><td>默认初始化 Git 并创建初始提交</td></tr>
+              <tr><td><code>--no-init-git</code></td><td>跳过所有 Git 操作，不初始化、不提交</td></tr>
+              <tr><td><code>--remote &lt;url&gt;</code></td><td>在 <code>.openspec-store/store.yaml</code> 记录克隆来源，不自动克隆或推送；已有身份文件时不能用此选项改写</td></tr>
+              <tr><td><code>--json</code></td><td>非交互式 JSON 输出</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tip-box"><strong>Git 提交：</strong>默认 setup 会创建初始提交。未获授权提交时，明确使用 <code>--no-init-git</code>。</div>
+        <div class="code-block">
+          <div class="code-header"><span>终端示例：不执行 Git 操作</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec store setup team-context --path ~/openspec/team-context --no-init-git --json</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec store register</code>
+        <span class="cli-desc">登记已有的健康 OpenSpec 根目录</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec store register [path] [--id &lt;id&gt;] [--yes] [--json]</code></pre>
+        </div>
+        <ul>
+          <li><code>path</code>：必须显式提供；虽然帮助语法显示可选，省略仍报错。目录须已存在且 OpenSpec 结构完整。</li>
+          <li><code>--id</code>：默认读取 Store 元数据，否则使用目录名；不能覆盖已有身份 ID。</li>
+          <li><code>--yes</code>：同意为缺少身份的根创建 <code>.openspec-store/store.yaml</code>。无交互或 JSON 模式下此转换必须明确确认。</li>
+          <li><code>--json</code>：输出登记结果。register 不克隆、不创建 Git 提交。</li>
+        </ul>
+        <div class="code-block">
+          <div class="code-header"><span>终端示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec store register /repos/team-context --json</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec store unregister</code>
+        <span class="cli-desc">忘记本机登记，保留文件</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec store unregister &lt;id&gt; [--json]</code></pre>
+        </div>
+        <p><strong>不删除文件：</strong>只移除本机登记，Store 目录及其中的规范、变更、Git 历史均留在磁盘。</p>
+      </div>
+    </div>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec store remove</code>
+        <span class="cli-desc">移除登记并删除本地目录</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec store remove &lt;id&gt; [--yes] [--json]</code></pre>
+        </div>
+        <div class="tip-box"><strong>删除警告：</strong>remove 会删除整个本地 Store 目录，包含未提交文件和本地历史。先备份。只想取消登记请用 unregister。</div>
+        <p><code>--yes</code> 确认删除；无交互或 <code>--json</code> 时必须提供。<code>--json</code> 输出删除结果，不免除确认。</p>
+      </div>
+    </div>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec store list / ls</code>
+        <span class="cli-desc">列出本机登记</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec store list [--json]
+openspec store ls [--json]</code></pre>
+        </div>
+        <p><code>--json</code> 输出 Store ID、根路径和诊断状态，不列出未登记目录。</p>
+      </div>
+    </div>
+
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec store doctor</code>
+        <span class="cli-desc">检查登记、元数据和 Git 状态</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec store doctor [id] [--json]</code></pre>
+        </div>
+        <p>省略 <code>id</code> 检查全部本机登记。<code>--json</code> 输出结构化报告；只检查，不修复。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 诊断与上下文 -->
+  <div class="subsection" id="cli-context">
+    <h3>doctor / context</h3>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec doctor</code>
+        <span class="cli-desc">检查所选根目录及其关联 Store</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec doctor [--store &lt;id&gt;] [--json]</code></pre>
+        </div>
+        <p>报告规划根、引用、缺失路径和修复建议。只读，不克隆、同步或自动修复；与检查本机登记的 <code>store doctor</code> 不同。</p>
+      </div>
+    </div>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec context</code>
+        <span class="cli-desc">输出所选根的工作上下文</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec context [--store &lt;id&gt;] [--json] [--code-workspace &lt;path&gt;] [--force]</code></pre>
+        </div>
+        <ul>
+          <li><code>--store</code>：选择已登记的根；省略时按项目声明和默认 Store 解析。</li>
+          <li><code>--json</code>：输出供代理读取的根和引用上下文，不授予跨仓库修改权限。</li>
+          <li><code>--code-workspace</code>：显式写入 VS Code 多根文件。这是 context 唯一的文件写入。</li>
+          <li><code>--force</code>：允许覆盖该文件；默认拒绝覆盖，父目录须已存在。</li>
+        </ul>
+        <div class="code-block">
+          <div class="code-header"><span>终端示例：默认只读</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec doctor --store team-context --json
+openspec context --store team-context --json</code></pre>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 工作区命令 (Beta) -->
-  <div class="subsection" id="cli-workspace">
-    <h3>工作区命令 <span class="badge-beta" style="display:inline-block;padding:2px 8px;margin-left:8px;border-radius:4px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:0.7em;vertical-align:middle">Beta</span></h3>
-    <div class="tip-box" style="border-left-color:#f59e0b;background:rgba(245,158,11,0.08)">
-      <strong>⚠️ 处于积极开发中</strong>：工作区相关命令尚未正式发布。<strong>请不要</strong>基于此命令面构建外部自动化、集成或长期工作流——命令行为、状态文件和 JSON 输出随时可能变更。
-    </div>
-    <p>协作工作区（Coordination Workspace）是用于规划跨多仓库/文件夹工作的久久规划家园。工作区只是「让 OpenSpec 看到哪些仓库/文件夹」，并不代表变更承诺。</p>
-
+  <!-- Workset 命令 -->
+  <div class="subsection" id="cli-workset">
+    <h3>Workset 命令</h3>
+    <p>Workset 是个人本机视图，不是规划根或仓库成员声明。它不授予跨仓库修改权限，也不会通过 Git 同步。</p>
     <div class="cli-cmd-block">
       <div class="cli-cmd-header">
-        <code>openspec workspace setup</code>
-        <span class="cli-desc">创建工作区并链接到至少一个已存在的仓库/文件夹</span>
-      </div>
-      <div class="cli-cmd-body">
-        <div class="table-wrapper">
-          <table class="doc-table">
-            <thead><tr><th>选项</th><th>描述</th></tr></thead>
-            <tbody>
-              <tr><td><code>--name &lt;name&gt;</code></td><td>工作区名（kebab-case）</td></tr>
-              <tr><td><code>--link &lt;path&gt;</code></td><td>链接已存在的仓库/文件夹，从文件夹名推断链接名</td></tr>
-              <tr><td><code>--link &lt;name&gt;=&lt;path&gt;</code></td><td>显式指定链接名</td></tr>
-              <tr><td><code>--opener &lt;id&gt;</code></td><td>偏好打开器：<code>codex</code>、<code>claude</code>、<code>github-copilot</code>、<code>editor</code></td></tr>
-              <tr><td><code>--no-interactive</code></td><td>禁用交互（需 <code>--name</code> 和至少一个 <code>--link</code>）</td></tr>
-              <tr><td><code>--json</code></td><td>JSON 输出（需配合 <code>--no-interactive</code>）</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="code-block">
-          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
-          <pre><code># 交互式向导
-openspec workspace setup
-
-# 自动化场景
-openspec workspace setup --no-interactive --name platform \
-  --link /repos/api --link web=/repos/web
-
-# 带偏好打开器
-openspec workspace setup --no-interactive --name platform \
-  --link /repos/api --opener codex</code></pre>
-        </div>
-      </div>
-    </div>
-
-    <div class="cli-cmd-block">
-      <div class="cli-cmd-header">
-        <code>openspec workspace list / ls</code>
-        <span class="cli-desc">列出本机已知工作区及其链接</span>
+        <code>openspec workset create</code>
+        <span class="cli-desc">组合并保存自选目录</span>
       </div>
       <div class="cli-cmd-body">
         <div class="code-block">
-          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
-          <pre><code>openspec workspace list
-openspec workspace ls
-openspec workspace list --json</code></pre>
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec workset create [name] [--member &lt;path|name=path&gt; ...] [--tool &lt;id&gt;] [--json]</code></pre>
+        </div>
+        <ul>
+          <li><code>name</code>：无交互或 JSON 模式下必填。</li>
+          <li><code>--member</code>：可重复。目录须存在，第一个是主目录；无交互时至少提供一个。</li>
+          <li><code>--tool</code>：保存首选打开工具。当前默认支持 <code>code</code>（VS Code）、<code>cursor</code>；Claude/Codex CLI 打开器暂时禁用。</li>
+          <li><code>--json</code>：非交互式创建，输出保存结果。</li>
+        </ul>
+        <div class="code-block">
+          <div class="code-header"><span>终端示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec workset create platform --member /repos/api \
+  --member web=/repos/web --tool code --json</code></pre>
         </div>
       </div>
     </div>
-
     <div class="cli-cmd-block">
       <div class="cli-cmd-header">
-        <code>openspec workspace link</code>
-        <span class="cli-desc">向工作区登记一个已存在的仓库/文件夹</span>
+        <code>openspec workset list / ls</code>
+        <span class="cli-desc">查看保存的视图和成员目录</span>
       </div>
       <div class="cli-cmd-body">
         <div class="code-block">
-          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
-          <pre><code># 从文件夹名自动推断链接名
-openspec workspace link /repos/api
-
-# 显式指定链接名
-openspec workspace link api-service /repos/api
-
-# 指定目标工作区
-openspec workspace link --workspace platform /repos/platform/apps/checkout</code></pre>
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec workset list [--json]
+openspec workset ls [--json]</code></pre>
         </div>
       </div>
     </div>
-
     <div class="cli-cmd-block">
       <div class="cli-cmd-header">
-        <code>openspec workspace relink</code>
-        <span class="cli-desc">修复或更改已有链接的本地路径</span>
+        <code>openspec workset open</code>
+        <span class="cli-desc">用工具打开保存的视图</span>
       </div>
       <div class="cli-cmd-body">
         <div class="code-block">
-          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
-          <pre><code>openspec workspace relink api-service /new/path/to/api</code></pre>
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec workset open &lt;name&gt; [--tool &lt;id&gt;]</code></pre>
         </div>
+        <p><code>--tool</code> 只覆盖本次打开；无交互且未保存工具时必须提供。open 会重建本机 <code>.code-workspace</code> 文件，不支持 <code>--json</code>。</p>
       </div>
     </div>
-
     <div class="cli-cmd-block">
       <div class="cli-cmd-header">
-        <code>openspec workspace doctor</code>
-        <span class="cli-desc">检查当前机器上工作区的解析情况</span>
+        <code>openspec workset remove</code>
+        <span class="cli-desc">删除保存的视图，不删除成员目录</span>
       </div>
       <div class="cli-cmd-body">
         <div class="code-block">
-          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
-          <pre><code>openspec workspace doctor
-openspec workspace doctor --workspace platform</code></pre>
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec workset remove &lt;name&gt; [--yes] [--json]</code></pre>
         </div>
-        <p style="color:var(--text-tertiary);font-size:0.9em">显示工作区位置、规划路径、已链接仓库/文件夹、缺失路径及修复建议；仅报告问题，不自动修复。</p>
-      </div>
-    </div>
-
-    <div class="cli-cmd-block">
-      <div class="cli-cmd-header">
-        <code>openspec workspace open</code>
-        <span class="cli-desc">通过偏好打开器启动工作区</span>
-      </div>
-      <div class="cli-cmd-body">
-        <div class="table-wrapper">
-          <table class="doc-table">
-            <thead><tr><th>选项</th><th>描述</th></tr></thead>
-            <tbody>
-              <tr><td><code>--workspace &lt;name&gt;</code></td><td>工作区名称（位置参数的别名）</td></tr>
-              <tr><td><code>--agent &lt;tool&gt;</code></td><td>本次会话覆盖：<code>codex</code>、<code>claude</code>、<code>github-copilot</code></td></tr>
-              <tr><td><code>--editor</code></td><td>以 VS Code 编辑器模式打开多根工作区文件</td></tr>
-              <tr><td><code>--no-interactive</code></td><td>禁用工作区和打开器选择提示</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="code-block">
-          <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
-          <pre><code>openspec workspace open
-openspec workspace open platform
-openspec workspace open platform --agent github-copilot
-openspec workspace open --editor</code></pre>
-        </div>
-      </div>
-    </div>
-
-    <div class="info-box">
-      <div class="info-icon">💡</div>
-      <div>
-        OpenSpec 会自动维护工作区根下的 <code>&lt;workspace-name&gt;.code-workspace</code> 多根工作区文件（仅本机），默认已加入 <code>.gitignore</code>。跨路径（Windows/WSL2等）不做自动转换，请使用运行时匹配的路径格式。
+        <p>仅移除视图及其生成的多根文件。无交互或 JSON 模式必须用 <code>--yes</code> 确认。成员目录从不改动。</p>
       </div>
     </div>
   </div>
@@ -238,9 +360,15 @@ openspec list
 # 列出所有规范
 openspec list --specs
 
-# JSON 输出（用于脚本）
-openspec list --json</code></pre>
+# 仅归档变更 / 活跃与归档变更
+openspec list --archived
+openspec list --all
+
+# 选择 Store，按名称排序并输出 JSON
+openspec list --store team-context --sort name --json</code></pre>
         </div>
+        <p><strong>选项：</strong><code>--changes</code> 显式选择变更（默认）；<code>--sort recent|name</code> 默认 recent。<code>--archived</code>、<code>--all</code> 仅适用于变更，不能与 <code>--specs</code> 同用。</p>
+        <div class="tip-box"><strong>没有规划根：</strong>list 会报错并以非零退出，不会将未初始化目录当作空项目。先运行 <code>openspec init</code>，或登记 Store 后传 <code>--store &lt;id&gt;</code>。</div>
       </div>
     </div>
     <div class="cli-cmd-block">
@@ -255,7 +383,28 @@ openspec list --json</code></pre>
 openspec show add-dark-mode
 
 # JSON 输出用于解析
-openspec show add-dark-mode --json</code></pre>
+openspec show add-dark-mode --json
+
+# 查看 Delta 的逐需求差异
+openspec show add-dark-mode --diff</code></pre>
+        </div>
+        <ul>
+          <li><code>--type change|spec</code>：同名时明确类型；<code>--store &lt;id&gt;</code> 选择规划根。</li>
+          <li><code>--no-interactive</code>：禁用选择提示，脚本应直接传入名称。</li>
+          <li><code>--diff</code>：仅变更，显示 Delta 需求差异；<code>--deltas-only</code> 仅用于变更 JSON。</li>
+          <li><code>--requirements</code>、<code>--no-scenarios</code>、<code>--requirement &lt;id&gt;</code>：仅规范 JSON，筛选需求或排除场景；ID 从 1 起。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec view</code>
+        <span class="cli-desc">查看规范和变更仪表盘</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec view [--store &lt;id&gt;]</code></pre>
         </div>
       </div>
     </div>
@@ -282,8 +431,31 @@ openspec validate --changes
 openspec validate --all --json
 
 # 严格模式
-openspec validate --all --strict --concurrency 12</code></pre>
+openspec validate --all --strict --concurrency 12
+
+# 检查归档变更是否仍有未勾选任务
+openspec validate --archived
+
+# 仅输出有问题的项目，并保留总计
+openspec validate --all --report findings --json</code></pre>
         </div>
+        <div class="table-wrapper">
+          <table class="doc-table">
+            <thead><tr><th>选项</th><th>描述</th></tr></thead>
+            <tbody>
+              <tr><td><code>--all</code> / <code>--changes</code> / <code>--specs</code></td><td>选择活跃变更和主规范的批量范围；all 不包含归档</td></tr>
+              <tr><td><code>--archived</code></td><td>独立检查归档任务是否全部打勾及任务文件是否可读，不重新验证已合并的 Delta</td></tr>
+              <tr><td><code>--report full|findings</code></td><td>仅限显式批量范围，不可带名称或混合归档与活跃范围；默认 full，findings 只列有问题的项目并保留完整汇总</td></tr>
+              <tr><td><code>--strict</code></td><td>规范和活跃变更的 ERROR 或 WARNING 均导致失败；默认仅 ERROR 失败，INFO 不阻断</td></tr>
+              <tr><td><code>--type change|spec</code></td><td>明确同名项目的类型</td></tr>
+              <tr><td><code>--json</code>、<code>--no-interactive</code></td><td>结构化结果或禁用提示；无名称时脚本须指定批量范围</td></tr>
+              <tr><td><code>--concurrency &lt;n&gt;</code></td><td>活跃变更和规范批量验证的并发数，默认环境变量值或 6</td></tr>
+              <tr><td><code>--store &lt;id&gt;</code></td><td>验证已登记 Store 的内容</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>失败退出：</strong>验证失败返回非零。<code>--all</code>、<code>--changes</code>、<code>--specs</code> 没有可解析的规划根时会报错。运行 <code>--archived</code> 前先确认项目目录或显式指定 <code>--store</code>，避免在错误目录得到空结果。</p>
+        <p><strong>验证范围：</strong>validate 检查规范结构和相关一致性，不运行代码测试；任务打勾也不代表实现已验证。</p>
       </div>
     </div>
   </div>
@@ -302,12 +474,29 @@ openspec validate --all --strict --concurrency 12</code></pre>
           <pre><code># 归档特定变更
 openspec archive add-dark-mode
 
-# 无提示归档（CI/脚本）
+# 无提示归档（CI/脚本）：先确认实现和测试结果
 openspec archive add-dark-mode --yes
 
-# 归档不影响规范的工具变更
+# JSON 模式同样显式提供名称和确认
+openspec archive add-dark-mode --yes --json
+
+# 本次跳过主规范更新
 openspec archive update-ci-config --skip-specs</code></pre>
         </div>
+        <ul>
+          <li><strong>无交互：</strong>显式提供变更名称和 <code>--yes</code>。<code>--json</code> 不会替你确认。</li>
+          <li><code>--yes</code>：跳过确认，可能允许带未完成任务归档；不跳过规范验证。</li>
+          <li><code>--skip-specs</code>：本次不合并主规范；不等于变更元数据 <code>skip_specs</code>。</li>
+          <li><code>--no-validate</code>：跳过验证，需要确认，不建议使用。<code>--store &lt;id&gt;</code> 选择规划根。</li>
+        </ul>
+        <p><strong>归档顺序：</strong>默认先校验并合并 Delta，再移动到 <code>openspec/changes/archive/YYYY-MM-DD-&lt;name&gt;/</code>。验证或规范合并失败时以非零退出，不归档。</p>
+        <p><strong>sync：</strong>可提前将 Delta 同步到主规范，不是每次归档的必需步骤；同步失败应先修复，不继续归档。</p>
+        <p><strong>变更元数据：</strong>在 <code>.openspec.yaml</code> 中声明，详见<a href="#concepts">核心概念</a>。</p>
+        <ul>
+          <li><code>skip_specs: true</code>：声明没有规范变更，不能同时包含 specs 文件。</li>
+          <li><code>retire_capabilities: true</code>：明确允许在移除最后需求时退役能力、删除主规范。</li>
+          <li><code>x-*</code>：顶层外部工具扩展字段，需小写前缀及无空白的非空名称。OpenSpec 忽略且不报未知键；其他未知键会警告，在 validate strict 模式下失败。</li>
+        </ul>
       </div>
     </div>
   </div>
@@ -324,16 +513,73 @@ openspec archive update-ci-config --skip-specs</code></pre>
         <div class="code-block">
           <div class="code-header"><span>示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
           <pre><code>openspec status --change add-dark-mode
-
-# 输出:
-# Change: add-dark-mode
-# Schema: spec-driven
-# Progress: 2/4 artifacts complete
-#
-# [x] proposal
-# [ ] design
-# [x] specs
-# [-] tasks (blocked by: design)</code></pre>
+openspec status --all --json
+openspec status --all --store team-context --json</code></pre>
+        </div>
+        <p><strong>选项：</strong><code>--change &lt;id&gt;</code> 或 <code>--all</code>（全部活跃变更），<code>--schema &lt;name&gt;</code> 覆盖工作流，<code>--json</code> 输出状态，<code>--store &lt;id&gt;</code> 选择规划根。</p>
+        <p><strong>isPlanningComplete：</strong>只表示规划产物齐全；兼容别名 <code>isComplete</code> 也是这个含义，不表示任务完成、测试通过或可以直接归档。</p>
+      </div>
+    </div>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec instructions</code>
+        <span class="cli-desc">获取产物、实现或归档指令</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>终端示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec instructions proposal --change add-dark-mode --json
+openspec instructions apply --change add-dark-mode --json
+openspec instructions archive --change add-dark-mode --json</code></pre>
+        </div>
+        <p><strong>语法：</strong><code>openspec instructions [artifact] [--change &lt;id&gt;] [--schema &lt;name&gt;] [--store &lt;id&gt;] [--json]</code>。apply 和 archive 是保留的工作流分支，输出指令，不直接实现或归档。</p>
+      </div>
+    </div>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec new change</code>
+        <span class="cli-desc">创建变更目录和元数据</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec new change &lt;name&gt; [--schema &lt;name&gt;] [--description &lt;text&gt;] [--goal &lt;text&gt;] [--store &lt;id&gt;] [--json]</code></pre>
+        </div>
+        <ul>
+          <li><code>--schema</code>：选择工作流；省略时按项目配置及根默认值解析。</li>
+          <li><code>--description</code>：将描述写入变更目录的 <code>README.md</code>。</li>
+          <li><code>--goal</code>：将目标写入 <code>.openspec.yaml</code> 元数据。</li>
+          <li><code>--store</code>：选择已登记的 Store。</li>
+          <li><code>--json</code>：输出创建结果，不自动生成完整规划。</li>
+        </ul>
+        <div class="code-block">
+          <div class="code-header"><span>终端示例</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec new change add-dark-mode --store team-context --goal '支持深色主题' --json</code></pre>
+        </div>
+      </div>
+    </div>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec templates</code>
+        <span class="cli-desc">查看产物模板的解析路径</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec templates [--schema &lt;name&gt;] [--json]</code></pre>
+        </div>
+        <p><code>--schema</code> 默认 spec-driven。<code>--json</code> 输出产物 ID 到 <code>{ path, source }</code> 的映射，不创建产物。</p>
+      </div>
+    </div>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec schemas</code>
+        <span class="cli-desc">列出可用工作流及描述</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec schemas [--store &lt;id&gt;] [--json]</code></pre>
         </div>
       </div>
     </div>
@@ -372,6 +618,32 @@ openspec schema init rapid \
           <pre><code># Fork 内置的 spec-driven schema
 openspec schema fork spec-driven my-workflow</code></pre>
         </div>
+      </div>
+    </div>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec schema validate</code>
+        <span class="cli-desc">检查 Schema 结构和模板</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec schema validate [name] [--json] [--verbose]</code></pre>
+        </div>
+        <p><code>--json</code> 输出验证结果，<code>--verbose</code> 显示详细步骤；检查工作流定义，不验证项目代码。</p>
+      </div>
+    </div>
+    <div class="cli-cmd-block">
+      <div class="cli-cmd-header">
+        <code>openspec schema which</code>
+        <span class="cli-desc">查看 Schema 的实际解析来源</span>
+      </div>
+      <div class="cli-cmd-body">
+        <div class="code-block">
+          <div class="code-header"><span>语法</span></div>
+          <pre><code>openspec schema which [name] [--all] [--json]</code></pre>
+        </div>
+        <p><code>--all</code> 列出全部 Schema 及来源；<code>--json</code> 输出结构化解析结果。</p>
       </div>
     </div>
     <div class="info-box">
@@ -427,9 +699,14 @@ openspec config edit</code></pre>
         <tbody>
           <tr><td><code>OPENSPEC_CONCURRENCY</code></td><td>批量验证的默认并发数（默认: 6）</td></tr>
           <tr><td><code>EDITOR</code> 或 <code>VISUAL</code></td><td>openspec config edit 使用的编辑器</td></tr>
-          <tr><td><code>NO_COLOR</code></td><td>设置时禁用彩色输出</td></tr>
-          <tr><td><code>OPENSPEC_TELEMETRY=0</code></td><td>禁用遥测数据收集</td></tr>
-          <tr><td><code>DO_NOT_TRACK=1</code></td><td>全局禁用追踪</td></tr>
+          <tr><td><code>NO_COLOR</code></td><td>设置时禁用彩色输出，也可使用全局 <code>--no-color</code></td></tr>
+          <tr><td><code>OPENSPEC_NO_ANIMATION</code></td><td>只要设置（即使空值）就禁用 init 欢迎动画；单次可用 <code>--no-animation</code></td></tr>
+          <tr><td><code>OPENSPEC_NO_COMPLETIONS=1</code></td><td>禁用首次 Shell 补全提示，不卸载已有补全</td></tr>
+          <tr><td><code>OPENSPEC_NO_UPDATE_CHECK</code></td><td>只要设置就禁用版本网络检查，不阻止主动安装</td></tr>
+          <tr><td><code>OPENSPEC_TELEMETRY=0</code></td><td>禁用匿名命令名和版本统计，也禁用版本检查；可用 <code>openspec config set telemetry.enabled false</code> 持久关闭</td></tr>
+          <tr><td><code>DO_NOT_TRACK=1</code></td><td>禁用追踪和版本检查</td></tr>
+          <tr><td><code>CI=true</code></td><td>自动关闭遥测、版本检查和首次补全提示</td></tr>
+          <tr><td><code>OPENSPEC_INSTALL_DIR</code>、<code>OPENSPEC_VERSION</code></td><td>独立安装目录和版本覆盖，示例见<a href="#installation">安装指南</a></td></tr>
         </tbody>
       </table>
     </div>

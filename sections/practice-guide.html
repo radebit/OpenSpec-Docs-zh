@@ -14,6 +14,7 @@
       希望系统学习 OpenSpec 的开发者，包括：想要提升 AI 编码效率的个人开发者、希望规范化 AI 协作流程的团队 Leader、以及对规范驱动开发（Spec-Driven Development）感兴趣的技术人员。
     </div>
   </div>
+  <p>AI 对话示例使用 Claude Code 的 <code>/opsx:</code> 拼写，其他工具请查看 <a href="#tool-invocation">调用方式</a>。扩展工作流需先通过 <code>openspec config profile</code> 选中，再运行 <code>openspec update</code>。</p>
 </section>
 
 <!-- ======================== Part 1: 深入理解 OpenSpec ======================== -->
@@ -139,8 +140,8 @@
     <div class="info-box">
       <div class="info-icon">💡</div>
       <div>
-        <strong>架构设计哲学</strong><br>
-        <code>specs/</code> 与 <code>changes/</code> 的分离是 OpenSpec 的核心设计。这确保了：① 主规范始终保持稳定 ② 多个变更可并行进行而不冲突 ③ 归档时 Delta 能干净合并回主规范
+        <strong>规划与主规范分离</strong><br>
+        <code>changes/</code> 保存未归档的修改。多个变更可以并行推进，但修改同一需求时仍需协调；同步检查通过后，Delta 才能合并到 <code>specs/</code>。
       </div>
     </div>
   </div>
@@ -261,6 +262,7 @@
           <code>/opsx:propose</code> → <code>/opsx:apply</code> → <code>/opsx:archive</code>
         </div>
         <div class="wfc-body">
+          <p>core 同时包含 <code>explore</code>、<code>update</code> 和 <code>sync</code>。需求变化时用 update 修订规划，需提前合并规范时用 sync；归档前仍需审查和验证。</p>
           <p><strong>适用场景：</strong></p>
           <ul>
             <li>需求明确的中小型功能</li>
@@ -346,15 +348,15 @@
         <div class="code-header"><span>specs/auth/spec.md</span></div>
         <pre><code># Auth 规范
 
-## 目的
+## Purpose
 用户身份验证和会话管理。
 
-## 需求
+## Requirements
 
-### 需求：JWT 令牌认证
+### Requirement: JWT 令牌认证
 系统 SHALL 在登录成功时颁发 JWT 令牌。
 
-#### 场景：有效凭据登录
+#### Scenario: 有效凭据登录
 - GIVEN 用户具有有效的邮箱和密码
 - WHEN 用户提交登录表单
 - THEN 系统返回包含 accessToken 和 refreshToken 的响应
@@ -362,7 +364,7 @@
 - AND refreshToken 有效期为 7 天
 - AND 用户被重定向到 dashboard 页面
 
-#### 场景：无效凭据登录
+#### Scenario: 无效凭据登录
 - GIVEN 用户提交无效的邮箱或密码
 - WHEN 用户提交登录表单
 - THEN 系统返回 401 状态码
@@ -375,7 +377,7 @@
         <div class="code-header"><span>反例：过于实现细节</span></div>
         <pre><code># 不好的规范 - 包含实现细节
 
-### 需求：登录功能
+### Requirement: 登录功能
 使用 bcrypt 比较密码，用 jsonwebtoken 库生成 JWT。
 在 UserController.login() 方法中实现，
 调用 AuthService.validatePassword() 验证...</code></pre>
@@ -401,10 +403,10 @@
           <div class="code-header"><span>示例</span></div>
           <pre><code>## ADDED Requirements
 
-### 需求：双因素认证
+### Requirement: 双因素认证
 系统 MUST 支持基于 TOTP 的双因素认证。
 
-#### 场景：启用 2FA
+#### Scenario: 启用 2FA
 - GIVEN 用户未启用 2FA
 - WHEN 用户在设置页面启用 2FA
 - THEN 显示二维码供 Authenticator App 扫描
@@ -419,17 +421,17 @@
           <div class="code-header"><span>示例</span></div>
           <pre><code>## MODIFIED Requirements
 
-### 需求：会话过期时间
+### Requirement: 会话过期时间
 系统 MUST 在 15 分钟不活动后使会话过期。
 （之前：30 分钟）
 
-#### 场景：空闲超时
+#### Scenario: 空闲超时
 - GIVEN 已认证的会话
 - WHEN 15 分钟内无任何操作
 - THEN 会话被作废
 - AND 用户需重新登录</code></pre>
         </div>
-        <p class="dp-effect">归档效果：替换主规范中同名需求</p>
+        <p class="dp-effect">归档效果：替换主规范中同名需求。必须带上该需求的完整内容和需要保留的所有场景，不能只写变化的几行。</p>
       </div>
 
       <div class="dp-card">
@@ -438,7 +440,7 @@
           <div class="code-header"><span>示例</span></div>
           <pre><code>## REMOVED Requirements
 
-### 需求：记住我功能
+### Requirement: 记住我功能
 （因支持 2FA 而废弃。用户应在每次会话重新认证。）</code></pre>
         </div>
         <p class="dp-effect">归档效果：从主规范中删除该需求</p>
@@ -493,7 +495,8 @@ rules:
   tasks:
     - 任务粒度适中（每个任务约 1-2 小时工作量）
     - 按模块分组，使用层级编号
-    - 包含必要的测试任务</code></pre>
+    - 每项任务说明验证方式
+    - 每组任务包含必要的测试和文档更新</code></pre>
     </div>
   </div>
 </section>
@@ -514,9 +517,10 @@ rules:
         <div class="step-number">1</div>
         <div class="step-content">
           <h4>安装 OpenSpec</h4>
+          <p>独立二进制无需 Node.js，安装步骤见 <a href="#installation">安装指南</a>。已有包管理器安装可继续使用原方式。</p>
           <div class="code-block">
             <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
-            <pre><code># 使用 npm 全局安装（推荐）
+            <pre><code># 包管理器安装示例（需 Node.js 20.19.0+）
 npm install -g @fission-ai/openspec@latest
 
 # 验证安装
@@ -618,7 +622,7 @@ openspec view</code></pre>
             </ul>
           </div>
           <div class="tip-box">
-            <strong>Pro Tip：</strong>如果发现产物有问题，直接告诉 AI 修改即可，如：「请把 tasks.md 中的第 2 组任务拆分得更细一些」
+            <strong>修订规划：</strong>运行 <code>/opsx:update add-dark-mode</code>，描述要调整的内容。AI 会先确认每项修订，再原地更新规划；这不会自动开始实现，也不会重置已完成任务。
           </div>
         </div>
       </div>
@@ -662,6 +666,7 @@ openspec view</code></pre>
             <div class="code-header"><span>AI 对话</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
             <pre><code>/opsx:verify</code></pre>
           </div>
+          <p><code>verify</code> 是扩展工作流，需先启用；也可自行审查代码并运行项目测试。任务全部打勾不代表这些检查已经执行。</p>
           <p>AI 将检查实现是否与产物一致：</p>
           <ul>
             <li><strong>Completeness</strong>：所有任务是否完成？所有需求是否实现？</li>
@@ -683,10 +688,11 @@ openspec view</code></pre>
           </div>
           <p>归档过程会：</p>
           <ol>
-            <li>将 Delta 规范合并到 <code>openspec/specs/ui/spec.md</code></li>
-            <li>将变更文件夹移动到 <code>openspec/changes/archive/2025-xx-xx-add-dark-mode/</code></li>
-            <li>保留完整的产物作为审计轨迹</li>
+            <li>检查规划、任务和 Delta 状态；遇到同步冲突或验证阻塞时停止。</li>
+            <li>同步 Delta 到 <code>openspec/specs/ui/spec.md</code>；已提前同步的相同操作不会重复修改。</li>
+            <li>同步成功后移至 <code>openspec/changes/archive/YYYY-MM-DD-add-dark-mode/</code>，保留完整产物。</li>
           </ol>
+          <p>日期使用运行机器的本地日期。归档失败不能当作成功；应按错误提示恢复或重试，而不是直接删除活动变更。</p>
         </div>
       </div>
     </div>
@@ -733,7 +739,7 @@ openspec view</code></pre>
       <div class="faq-answer">
         <p><strong>解决方案：</strong></p>
         <ol>
-          <li><strong>完善项目配置</strong>：在 <code>openspec/config.yaml</code> 中添加详细的项目上下文（技术栈、代码规范、架构约定等），AI 会参考这些信息</li>
+          <li><strong>完善项目配置</strong>：在 <code>openspec/config.yaml</code> 中记录语言、约束和文档入口；会随代码变化的结构和实现应由 AI 读取仓库确认。</li>
           <li><strong>添加产物规则</strong>：为特定产物添加 rules，如要求 specs 必须使用 Given/When/Then 格式</li>
           <li><strong>使用高质量模型</strong>：OpenSpec 官方推荐使用 Claude Opus 4.5 或 GPT 5.2 等高推理能力模型</li>
           <li><strong>提供更多上下文</strong>：在 <code>/opsx:propose</code> 时提供更详细的描述</li>
@@ -770,17 +776,22 @@ openspec view</code></pre>
         <p><strong>可能原因及解决方案：</strong></p>
         <ol>
           <li><strong>未初始化</strong>：运行 <code>openspec init</code> 初始化项目</li>
-          <li><strong>配置过期</strong>：升级 OpenSpec 后运行 <code>openspec update</code> 重新生成 AI 工具配置</li>
-          <li><strong>工具未选择</strong>：检查初始化时是否选择了你使用的 AI 工具</li>
-          <li><strong>需要重启</strong>：某些 AI 工具需要重启才能加载新的 skills/commands</li>
+          <li><strong>配置过期</strong>：先升级 CLI，再运行 <code>openspec update --dry-run</code> 预览；确认后执行 <code>openspec update</code>。</li>
+          <li><strong>调用拼写不同</strong>：Codex 使用 <code>$openspec-propose</code>，Kimi 使用 <code>/skill:openspec-propose</code>；没有命令文件不一定是故障，见 <a href="#tool-invocation">调用方式</a>。</li>
+          <li><strong>未安装该工作流</strong>：通过 <code>openspec config profile</code> 选中扩展工作流，再更新项目配置。</li>
+          <li><strong>工具未选择或需重新加载</strong>：检查 <code>--tools</code> 设置，按 init 输出决定是否重启工具。</li>
         </ol>
         <div class="code-block">
           <div class="code-header"><span>修复步骤</span></div>
-          <pre><code># 重新初始化，指定你的 AI 工具
-openspec init --tools claude,cursor --force
+          <pre><code># 交互式选择工具，清理已有文件前确认并备份
+openspec init
 
-# 或只更新配置
-openspec update --force</code></pre>
+# 预览指令文件刷新
+openspec update --dry-run
+
+# 确认后刷新
+openspec update</code></pre>
+          <p><code>--force</code> 会绕过旧文件清理提示或重写生成文件。不要把它当成默认修复步骤；先检查待删除、迁移和覆盖的内容。</p>
         </div>
       </div>
     </div>
@@ -794,9 +805,9 @@ openspec update --force</code></pre>
       <div class="faq-answer">
         <p>OpenSpec 支持并行变更，但当多个变更修改同一个规范时需要注意：</p>
         <ol>
-          <li><strong>使用 /opsx:bulk-archive</strong>：它会自动检测规范冲突并按时间顺序合并</li>
-          <li><strong>先归档依赖变更</strong>：如果变更 B 依赖变更 A 的结果，先归档 A</li>
-          <li><strong>手动解决</strong>：如果冲突复杂，可以手动编辑 specs 文件后再归档</li>
+          <li><strong>检查冲突</strong>：启用 <code>bulk-archive</code> 后，它会检查重叠规范并结合实现提出合并建议，不保证仅按时间顺序就能解决。</li>
+          <li><strong>先归档依赖变更</strong>：如果 B 依赖 A，先归档 A，再通过 <code>update</code> 修订 B 的 Delta 与规划。</li>
+          <li><strong>确认再归档</strong>：冲突或 sync 验证失败时先修正 Delta，重新验证；未解决的阻塞不能继续移动变更目录。</li>
         </ol>
         <div class="code-block">
           <div class="code-header"><span>AI 对话 — 批量归档</span></div>
@@ -804,8 +815,8 @@ openspec update --force</code></pre>
 
 # AI 会检测冲突并提示：
 # ⚠ add-dark-mode 和 update-theme-system 都修改 specs/ui/
-# 将按创建时间顺序合并：add-dark-mode → update-theme-system
-# 是否继续？</code></pre>
+# 需检查实现与 Delta 的实际意图，再确认合并顺序
+# 有阻塞时先修正，不会直接归档</code></pre>
         </div>
       </div>
     </div>
@@ -842,7 +853,7 @@ openspec update --force</code></pre>
         <span class="faq-toggle">+</span>
       </div>
       <div class="faq-answer">
-        <p>OpenSpec 支持 20+ AI 编码助手，包括但不限于：</p>
+        <p>当前有 50 个集成目标（含通用 skills 目录），部分工具仅提供技能。完整清单与路径见 <a href="#supported-tools">支持的工具</a>。</p>
         <div class="tools-mini-grid">
           <span>Claude Code</span><span>Cursor</span><span>Windsurf</span><span>GitHub Copilot</span>
           <span>Kiro</span><span>Cline</span><span>RooCode</span><span>Continue</span>

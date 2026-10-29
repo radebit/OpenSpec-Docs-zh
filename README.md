@@ -13,7 +13,7 @@
 
 - **在线文档**：[https://openspec.radebit.com](https://openspec.radebit.com)
 - **GitHub Pages**：[https://radebit.github.io/OpenSpec-Docs-zh](https://radebit.github.io/OpenSpec-Docs-zh)
-- **本地预览**：克隆仓库后直接打开 `index.html`，或启动静态服务（见下方[本地运行](#本地运行)）
+- **本地预览**：克隆仓库后启动静态服务（见下方[本地运行](#本地运行)），不要直接双击打开 HTML
 
 ![页面预览](assets/home-page.jpg)
 
@@ -56,12 +56,12 @@ OpenSpec-Docs-zh/
 | 项目概览 & 设计哲学 | `README.md` |
 | 安装指南 | `docs/installation.md` |
 | 快速开始 | `docs/getting-started.md` |
-| 核心概念（规范/变更/产物/Delta/Schema） | `docs/concepts.md` |
-| OPSX Slash 命令参考 | `docs/commands.md` |
+| 核心概念（规范/变更/产物/Delta/Schema/Store/Workset） | `docs/concepts.md`、`docs/stores-beta/user-guide.md` |
+| OPSX 工作流与工具调用方式 | `docs/commands.md`、`src/core/profiles.ts` |
 | CLI 终端命令参考 | `docs/cli.md` |
 | 工作流模式 | `docs/workflows.md` |
 | 自定义配置 | `docs/customization.md` |
-| 支持的 AI 工具（30+款） | `docs/supported-tools.md` |
+| 支持的 AI 工具（50 个目标，含通用 skills 目录） | `docs/supported-tools.md`、`src/core/config.ts` |
 | 多语言支持 | `docs/multi-language.md` |
 | 实战指南 | 社区补充内容 |
 | 关于文档 & 更新历史 | 社区维护 |
@@ -71,7 +71,9 @@ OpenSpec-Docs-zh/
 ## 与官方文档的关系
 
 - 本项目基于官方英文文档翻译整理，**为独立社区项目，非官方出品**
-- 当前同步至官方版本：**v1.3.1**（sync 进入 core profile、新增 Workspace 命令族 Beta、新增 Kimi CLI / Lingma 工具支持）
+- 当前同步至官方版本：**v1.15.0**（2026-10-29 更新）
+- 内容涵盖独立二进制安装、规划修订工作流、Store / Workset（Beta）、更新预览和工具集成；同步与归档包含场景完整性、路径及失败恢复说明
+- core profile：`propose`、`explore`、`apply`、`update`、`sync`、`archive`
 - 部分技术术语进行了本地化处理，例如：
   - `Source of Truth` → 权威基准
   - `Brownfield Development` → 存量项目开发
@@ -102,10 +104,13 @@ python3 -m http.server 8080
 npx serve .
 ```
 
+如果从 OpenSpec 源码仓库预览本站：
+
 ```bash
-# 方式三：直接打开（部分浏览器支持）
-open index.html
+python3 -m http.server 8080 --bind 127.0.0.1 --directory html-doc
 ```
+
+浏览器访问 `http://localhost:8080`。
 
 ---
 

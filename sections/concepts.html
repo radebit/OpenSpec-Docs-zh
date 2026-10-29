@@ -54,80 +54,79 @@
     </div>
     <div class="info-box">
       <div class="info-icon">💡</div>
-      <div>这种分离是关键。你可以并行处理多个变更而不发生冲突，在变更影响主规范之前先进行审查，归档时 Delta 会干净地合并回主规范。</div>
+      <div>这种分离允许多个变更并行规划，并在影响主规范前审查。它不保证无冲突：触及同一主规范或需求时仍需协调，合并前必须处理冲突。</div>
     </div>
   </div>
 
-  <!-- 协作工作区 (Beta) -->
-  <div class="subsection" id="concepts-workspaces">
-    <h3>协作工作区（Coordination Workspaces）<span class="badge-beta" style="display:inline-block;padding:2px 8px;margin-left:8px;border-radius:4px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:0.7em;vertical-align:middle">Beta</span></h3>
+  <!-- Store、References 与 Workset (Beta) -->
+  <div class="subsection" id="concepts-stores">
+    <h3>Store、References 与 Workset<span class="badge-beta" style="display:inline-block;padding:2px 8px;margin-left:8px;border-radius:4px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:0.7em;vertical-align:middle">Beta</span></h3>
     <div class="tip-box" style="border-left-color:#f59e0b;background:rgba(245,158,11,0.08)">
-      <strong>⚠️ 处于积极开发中</strong>：工作区相关功能尚未正式发布，命令行为、状态文件和 JSON 输出随时可能变更。不建议在生产环境或长期工作流中使用。
+      <strong>Beta 功能</strong>：Store、references、context 和 workset 处于测试阶段，命令、文件格式和 JSON 输出可能变化。
     </div>
 
-    <p>仓库本地的 OpenSpec 项目适合「单仓库拥有规划、实现、归档全流程」的场景。但某些工作横跨多个仓库或文件夹，这时 <strong>协作工作区</strong> 就是一个久久的规划家园。</p>
-
+    <p>将共享规划放在独立仓库，用 references 提供只读上游规范，用 workset 重开本机相关文件夹。</p>
     <div class="info-box">
-      <div class="info-icon">🧠</div>
+      <div class="info-icon">Store</div>
       <div>
-        <strong>工作区心智模型</strong><br>
-        <code>workspace</code> = 相关跨仓库变更寄存的地方<br>
-        <code>link</code> = 工作区可以规划的仓库/文件夹的稳定名称<br>
-        <code>change</code> = 一个特性、修复、项目或其他规划好的工作单元
+        <strong>三个不同的职责</strong><br>
+        <code>store</code> = 在本机按名称登记的独立 OpenSpec 规划 repo<br>
+        <code>references</code> = 当前根读取的上游 store 规范，不改变命令操作根<br>
+        <code>workset</code> = 个人保存的本机文件夹视图，不是共享规划状态
       </div>
     </div>
 
-    <p>工作区的目录形态与仓库本地项目不同：</p>
+    <p><strong>Store 结构</strong>：沿用仓库本地 <code>openspec/</code> 布局，另有共享身份文件。登记表仅保存本机映射。</p>
     <div class="code-block">
-      <div class="code-header"><span>工作区目录结构</span></div>
-      <pre><code>workspace-folder/
-├── changes/                       # 工作区级别的规划
-└── .openspec-workspace/
-    ├── workspace.yaml             # 共享的工作区身份与链接名
-    └── local.yaml                 # 本机的本地路径（仅本机）</code></pre>
-    </div>
-
-    <p>而仓库本地 OpenSpec 保持原有形态：</p>
-    <div class="code-block">
-      <div class="code-header"><span>仓库本地目录结构</span></div>
-      <pre><code>repo-root/
+      <div class="code-header"><span>独立规划仓库</span></div>
+      <pre><code>team-plans/
+├── .openspec-store/
+│   └── store.yaml                 # store 身份，随仓库共享
 └── openspec/
-    ├── specs/
-    └── changes/</code></pre>
+    ├── specs/                     # 当前行为
+    ├── changes/                   # 活跃变更及 archive/
+    └── config.yaml                # schema、上下文与规则</code></pre>
     </div>
-
-    <p><strong>稳定链接名</strong> 是工作区规划引用仓库/文件夹的方式：共享状态保留诸如 <code>api</code>、<code>web</code>、<code>checkout</code> 之类的名称，每台机器再将它们映射到自己的本地路径。</p>
-
+    <p>先创建并登记 store，再用 <code>--store</code> 选择它。已有 checkout 用 <code>openspec store register &lt;path&gt;</code> 登记。空的 specs/、changes/ 目录可能尚未进入 Git。</p>
     <div class="code-block">
-      <div class="code-header"><span>.openspec-workspace/workspace.yaml（可移植）</span></div>
-      <pre><code>version: 1
-name: platform
-links:
-  api: {}
-  web: {}</code></pre>
+      <div class="code-header"><span>终端：选择独立规划根</span></div>
+      <pre><code>openspec store setup team-plans --path ~/openspec/team-plans
+openspec new change add-login --store team-plans</code></pre>
     </div>
+    <p><strong>Git 由你管理</strong>：OpenSpec 不会自动 clone、pull、push 或同步规范。共享规划仍需你提交、推送、拉取和审查。命令见 <a href="#cli-store">CLI 参考 - Store</a>。</p>
+
+    <p><strong>References 只读</strong>：保留组件仓库自己的根，在 <code>openspec/config.yaml</code> 声明上游 store。instructions 提供主规范摘要与精确读取命令，不自动读取活跃变更或写入上游。</p>
     <div class="code-block">
-      <div class="code-header"><span>.openspec-workspace/local.yaml（仅本机）</span></div>
-      <pre><code>version: 1
-paths:
-  api: /repos/api
-  web: /repos/web</code></pre>
+      <div class="code-header"><span>组件仓库：openspec/config.yaml</span></div>
+      <pre><code>schema: spec-driven
+references:
+  - team-plans</code></pre>
     </div>
+    <p><code>openspec context</code> 列出当前根及其 references。它不自动发现所有组件代码仓库，也不改变根选择。见 <a href="#cli-context">CLI 参考 - Context</a>。</p>
 
-    <p>链接路径可以是完整的仓库、大型 monorepo 中的文件夹、或其他已存在的文件夹。它们不需要先初始化仓库本地 <code>openspec/</code> 状态即可参与工作区规划：</p>
+    <p><strong>store: 指向外置根</strong>：若仓库不保存本地规划，只有 config 文件而没有 <code>openspec/specs/</code> 或 <code>openspec/changes/</code> 目录，可声明指针：</p>
     <div class="code-block">
-      <div class="code-header"><span>两种典型场景</span></div>
-      <pre><code># 多仓库：
-api      -> /repos/api
-web      -> /repos/web
-
-# 大型 monorepo：
-billing  -> /repos/platform/services/billing
-checkout -> /repos/platform/apps/checkout</code></pre>
+      <div class="code-header"><span>config-only 仓库：openspec/config.yaml</span></div>
+      <pre><code>store: team-plans</code></pre>
     </div>
+    <p><strong>根选择顺序</strong>：普通工作流命令按以下顺序选择一个根；先找到最近的有效目录，再判断本地规划或指针，不把所有祖先分开排序。</p>
+    <ol>
+      <li><code>--store &lt;id&gt;</code>：显式选择已登记 store，优先于本地根和指针。</li>
+      <li>从当前目录向上找最近的有效 <code>openspec/</code>：有 specs/ 或 changes/ 目录且目录自身不是独立 store 根时，使用本地根，即使目录为空；同时存在的字符串 store: 被忽略并警告。仅有 config 文件时，有 store: 就解析指针，无 store: 仍为本地根。单独的空 openspec/ 目录不算根。</li>
+      <li>没有有效目录时，使用全局 <code>defaultStore</code>（<code>openspec config set defaultStore team-plans</code>）。</li>
+      <li>仍未选中根：已有登记 store 则报错并提示显式选择；无登记 store 则仅在命令允许隐式根时使用当前目录，否则报错。</li>
+    </ol>
+    <p>参与根选择的显式 store、指针或 defaultStore 解析失败时直接报错，不静默降级到其他根。较近的 config-only 指针也不会被更远的祖先规划根覆盖。</p>
 
+    <p><strong>Workset 仅为个人视图</strong>：保存本机 checkout 路径并在编辑器中重开。它不选择命令根、不分派跨仓库任务，也不授予代理跨 repo 写权限。</p>
+    <div class="code-block">
+      <div class="code-header"><span>终端：保存并重开本机文件夹</span></div>
+      <pre><code>openspec workset create platform \
+  --member ~/openspec/team-plans --member ~/src/api-server --tool code
+openspec workset open platform</code></pre>
+    </div>
     <div class="tip-box">
-      <strong>工作区可见性 ≠ 变更承诺</strong>：先创建工作区让 OpenSpec 知道相关的仓库/文件夹，准备规划具体特性时再创建 change。详细命令见 <a href="#cli-workspace">CLI 参考 - 工作区命令</a>。
+      <strong>可见性不是授权</strong>：workset 不随规划仓库共享，移除 workset 不删除成员文件夹。实现、测试和审查仍需明确各 repo 的范围。见 <a href="#cli-workset">CLI 参考 - Workset</a>。
     </div>
   </div>
 
@@ -139,21 +138,21 @@ checkout -> /repos/platform/apps/checkout</code></pre>
       <div class="code-header"><span>openspec/specs/auth/spec.md</span></div>
       <pre><code># Auth 规范
 
-## 目的
-应用程序的身份验证和会话管理。
+## Purpose
+定义应用程序的身份验证契约与会话边界，让客户端可以依赖一致的登录成功响应、凭据错误处理和令牌颁发行为，不限定服务内部实现方式。
 
-## 需求
+## Requirements
 
-### 需求：用户身份验证
+### Requirement: 用户身份验证
 系统 SHALL 在登录成功时颁发 JWT 令牌。
 
-#### 场景：有效凭据
+#### Scenario: 有效凭据
 - GIVEN 用户具有有效凭据
 - WHEN 用户提交登录表单
 - THEN 返回 JWT 令牌
 - AND 用户被重定向到仪表板
 
-#### 场景：无效凭据
+#### Scenario: 无效凭据
 - GIVEN 无效凭据
 - WHEN 用户提交登录表单
 - THEN 显示错误消息
@@ -163,13 +162,15 @@ checkout -> /repos/platform/apps/checkout</code></pre>
       <table class="doc-table">
         <thead><tr><th>元素</th><th>用途</th></tr></thead>
         <tbody>
-          <tr><td><code>## 目的</code></td><td>该规范领域的高层描述</td></tr>
-          <tr><td><code>### 需求：</code></td><td>系统必须具备的具体行为</td></tr>
-          <tr><td><code>#### 场景：</code></td><td>需求的具体示例（可验证的）</td></tr>
-          <tr><td>SHALL / MUST / SHOULD</td><td>RFC 2119 关键词，表示需求强度</td></tr>
+          <tr><td><code>## Purpose</code></td><td>规范的用途与行为边界</td></tr>
+          <tr><td><code>## Requirements</code></td><td>主规范的需求集合，不含 Delta 操作节</td></tr>
+          <tr><td><code>### Requirement:</code></td><td>具体行为；冒号后名称与正文可以用中文</td></tr>
+          <tr><td><code>#### Scenario:</code></td><td>带实际内容的可验证场景，使用四个 #</td></tr>
+          <tr><td>SHALL / MUST</td><td>规范性正文关键词；建议保留，strict 模式仍要求</td></tr>
         </tbody>
       </table>
     </div>
+    <p><strong>结构锚点保持英文</strong>：不要把 Purpose、Requirements、Requirement: 或 Scenario: 翻译成中文。普通 <code>openspec validate</code> 对正文缺少 SHALL/MUST 仅警告，不因此判失败；<code>--strict</code> 会因该警告失败。标题中有关键词不能替代正文。</p>
     <div class="tip-box">
       <strong>规范的本质</strong>：规范是<strong>行为契约</strong>，而非实现计划。好的规范内容包括可观察行为、输入/输出/错误条件、外部约束。避免在规范中写内部类名、库或框架选择、逐步实现细节。
     </div>
@@ -187,8 +188,8 @@ checkout -> /repos/platform/apps/checkout</code></pre>
 ├── tasks.md              # 实现任务清单（带复选框）
 ├── .openspec.yaml        # 变更元数据（可选）
 └── specs/                # Delta 规范
-    └── ui/
-        └── spec.md       # ui/spec.md 中正在变化的内容</code></pre>
+    └── theme-preference/
+        └── spec.md       # 对应 proposal 声明的新 capability</code></pre>
     </div>
     <div class="cards-grid">
       <div class="feature-card">
@@ -199,7 +200,7 @@ checkout -> /repos/platform/apps/checkout</code></pre>
       <div class="feature-card">
         <div class="card-icon">⚡</div>
         <h3>并行工作</h3>
-        <p>多个变更可以同时存在而不冲突。在修复 bug 的同时开发新功能。</p>
+        <p>多个变更可以同时存在。共享主规范或需求时需协调，不保证合并无冲突。</p>
       </div>
       <div class="feature-card">
         <div class="card-icon">📚</div>
@@ -212,12 +213,47 @@ checkout -> /repos/platform/apps/checkout</code></pre>
         <p>变更文件夹易于审查——打开它，阅读提案，检查设计，查看规范 Delta。</p>
       </div>
     </div>
+    <p><strong>.openspec.yaml 元数据</strong>：文件可省略；一旦提供，必须有可解析到现有工作流的 <code>schema</code>。布尔标记必须是 YAML 布尔值，不能写成字符串。</p>
+    <div class="table-wrapper">
+      <table class="doc-table">
+        <thead><tr><th>字段</th><th>用途与约束</th></tr></thead>
+        <tbody>
+          <tr><td><code>schema</code></td><td>必填，工作流 schema 名称，如 spec-driven</td></tr>
+          <tr><td><code>created</code></td><td>可选字符串，YYYY-MM-DD 格式</td></tr>
+          <tr><td><code>goal</code></td><td>可选非空字符串，记录目标</td></tr>
+          <tr><td><code>affected_areas</code></td><td>可选字符串数组，元素非空，记录涉及区域</td></tr>
+          <tr><td><code>initiative</code></td><td>可选关联对象，仅接受 store 和 id；值为 kebab-case 标识符</td></tr>
+          <tr><td><code>skip_specs: true</code></td><td>无行为变化的 refactor、tooling、docs 变更免写 Delta；specs/ 下不得有任何文件。按 generates 的 specs/ 路径前缀跳过产物，不按产物 id 判断</td></tr>
+          <tr><td><code>retire_capabilities: true</code></td><td>授权在 REMOVED 移除最后一个需求时退休 capability，删除对应 live spec；安全检查仍须通过</td></tr>
+          <tr><td><code>x-*</code></td><td>顶层工具扩展，OpenSpec 忽略且不警告；前缀必须小写 x-，后缀非空且无空白，如 x-tracker、x-jiraKey</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span>无行为变化：openspec/changes/refactor-theme/.openspec.yaml</span></div>
+      <pre><code>schema: spec-driven
+created: "2026-10-01"
+skip_specs: true
+x-tracker: UI-42</code></pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span>移除 capability：变更 .openspec.yaml（配合 REMOVED Delta）</span></div>
+      <pre><code>schema: spec-driven
+retire_capabilities: true</code></pre>
+    </div>
+    <p><strong>未知键无效果</strong>：非 x-* 的未知顶层键在 validate 中产生 warning，<code>--strict</code> 因此失败。<code>skip_design</code> 不受支持。扩展约定不适用于 initiative 内部。</p>
+    <div class="tip-box">
+      <strong>skip_specs ≠ archive --skip-specs</strong>：元数据声明没有规范行为变化，影响产物与验证；CLI 归档选项仅跳过该次主规范合并，不替代元数据，也不豁免 Delta 验证。
+    </div>
   </div>
 
   <!-- 产物 -->
   <div class="subsection" id="concepts-artifacts">
     <h3>产物 (Artifacts)</h3>
-    <p>产物是变更中指导工作的文档，它们相互构建，每个产物为下一个提供上下文：</p>
+    <p>按当前 schema 的依赖和指令创建产物。下面展示默认 spec-driven 的常用顺序，specs 与 design 都依赖 proposal，可并行准备。</p>
+    <div class="tip-box">
+      <strong>planning complete 不等于工作完成</strong>：<code>done</code> 仅表示输出文件存在；<code>skipped</code> 表示 skip_specs 满足了对应依赖。<code>isPlanningComplete</code>（兼容字段 <code>isComplete</code>）不证明内容完整、代码实现或测试通过。<code>specs/**/*.md</code> 命中一个文件就可能标记 specs 为 done，仍须逐一核对 proposal 中所有 capability 的 <code>specs/&lt;capability-path&gt;/spec.md</code>。
+    </div>
     <div class="artifact-flow">
       <div class="af-node">
         <div class="af-name">proposal.md</div>
@@ -252,15 +288,22 @@ checkout -> /repos/platform/apps/checkout</code></pre>
             <div class="code-header"><span>proposal.md 示例</span></div>
             <pre><code># 提案：添加暗色模式
 
-## 意图
+## Why
 用户希望有一个暗色模式选项，以减少夜间使用时的眼睛疲劳。
 
-## 范围
-包含：主题切换按钮、系统偏好检测、本地存储持久化
-不包含：自定义颜色主题（未来工作）
+## What Changes
+- 添加主题切换、系统偏好检测与本地存储持久化。
+- 不包含自定义颜色主题。
 
-## 方案
-使用 CSS 自定义属性进行主题设置，React Context 进行状态管理。</code></pre>
+## Capabilities
+### New Capabilities
+- `theme-preference`：选择并保存亮色或暗色主题。
+
+### Modified Capabilities
+无。
+
+## Impact
+影响设置页与主题样式；技术选型写入 design.md。</code></pre>
           </div>
         </div>
       </div>
@@ -295,25 +338,25 @@ CSS 自定义属性支持运行时切换而无需切换 class。
           <span class="accordion-icon">+</span>
         </div>
         <div class="accordion-body">
-          <p>任务是带复选框的具体实现步骤：</p>
+          <p>每个复选框任务都写明验收方式：测试、命令、可观察行为或交付产物。实现与本组所需测试一起完成，不把测试全部留到最后。</p>
           <div class="code-block">
             <div class="code-header"><span>tasks.md 示例</span></div>
             <pre><code># 任务
 
 ## 1. 主题基础设施
-- [ ] 1.1 创建带有亮/暗状态的 ThemeContext
-- [ ] 1.2 为颜色添加 CSS 自定义属性
-- [ ] 1.3 实现 localStorage 持久化
-- [ ] 1.4 添加系统偏好检测
+- [ ] 1.1 创建亮/暗状态的 ThemeContext；运行状态切换单元测试
+- [ ] 1.2 为颜色添加 CSS 自定义属性；检查两种主题的计算样式
+- [ ] 1.3 实现 localStorage 持久化；测试刷新后保留选择
+- [ ] 1.4 添加系统偏好检测；测试无保存选择时跟随系统主题
 
 ## 2. UI 组件
-- [ ] 2.1 创建 ThemeToggle 组件
-- [ ] 2.2 在设置页面添加切换
-- [ ] 2.3 更新 Header 包含快速切换
+- [ ] 2.1 创建 ThemeToggle；通过键盘与鼠标切换组件测试
+- [ ] 2.2 在设置页添加切换；验证页面主题即时更新
+- [ ] 2.3 在 Header 添加快速切换；测试与设置页状态一致
 
 ## 3. 样式
-- [ ] 3.1 定义暗色主题调色板
-- [ ] 3.2 更新组件使用 CSS 变量</code></pre>
+- [ ] 3.1 定义暗色调色板；检查文字对比度达到项目标准
+- [ ] 3.2 更新组件使用 CSS 变量；对两种主题运行视觉回归</code></pre>
           </div>
         </div>
       </div>
@@ -328,47 +371,70 @@ CSS 自定义属性支持运行时切换而无需切换 class。
       <div class="code-header"><span>Delta 规范格式示例</span></div>
       <pre><code># Auth 的 Delta 规范
 
-## ADDED Requirements（新增需求）
+## ADDED Requirements
 
-### 需求：双因素认证
+### Requirement: 双因素认证
 系统 MUST 支持基于 TOTP 的双因素认证。
 
-#### 场景：2FA 登录
+#### Scenario: 2FA 登录
 - GIVEN 启用了 2FA 的用户
 - WHEN 用户提交有效凭据
 - THEN 呈现 OTP 挑战
 - AND 仅在有效 OTP 后完成登录
 
-## MODIFIED Requirements（修改需求）
+## MODIFIED Requirements
 
-### 需求：会话过期
+### Requirement: 会话过期
 系统 MUST 在 15 分钟不活动后使会话过期。
-（之前：30 分钟）
 
-## REMOVED Requirements（删除需求）
+#### Scenario: 空闲超时
+- GIVEN 已登录会话连续 15 分钟没有活动
+- WHEN 用户再次请求受保护资源
+- THEN 拒绝请求并要求重新登录
 
-### 需求：记住我
-（因支持 2FA 而废弃。用户应在每次会话重新认证。）</code></pre>
+#### Scenario: 持续活动
+- GIVEN 已登录会话每隔不到 15 分钟就有活动
+- WHEN 用户请求受保护资源
+- THEN 会话保持有效
+
+## REMOVED Requirements
+
+### Requirement: 记住我
+**Reason**: 持久登录不再符合双因素认证的安全策略。
+**Migration**: 用户在每次新会话中重新认证。
+
+## RENAMED Requirements
+
+- FROM: `### Requirement: 用户身份验证`
+- TO: `### Requirement: 用户登录`</code></pre>
     </div>
     <div class="table-wrapper">
       <table class="doc-table">
         <thead><tr><th>Delta 节</th><th>含义</th><th>归档时操作</th></tr></thead>
         <tbody>
           <tr><td><code>## ADDED Requirements</code></td><td>新行为</td><td>追加到主规范</td></tr>
-          <tr><td><code>## MODIFIED Requirements</code></td><td>变更的行为</td><td>替换现有需求</td></tr>
+          <tr><td><code>## MODIFIED Requirements</code></td><td>变更的行为</td><td>替换整个需求块及其场景</td></tr>
           <tr><td><code>## REMOVED Requirements</code></td><td>废弃的行为</td><td>从主规范中删除</td></tr>
+          <tr><td><code>## RENAMED Requirements</code></td><td>仅改名称；相邻两行 <code>- FROM: `### Requirement: 旧名`</code>、<code>- TO: `### Requirement: 新名`</code></td><td>重命名并保留正文与场景</td></tr>
         </tbody>
       </table>
+    </div>
+    <p><strong>操作头保持精确</strong>：不要给上述四个英文标题添加括号或中文后缀。ADDED 与 MODIFIED 必须有需求正文及至少一个非空 Scenario。</p>
+    <p><strong>MODIFIED 复制完整块</strong>：先读取 live spec，从 Requirement 标题复制到全部场景结束，再修改行为。示例假定会话过期已有“空闲超时”和“持续活动”场景；实际变更必须保留当前需求的所有场景，不能只写新描述。若同时 RENAMED 与 MODIFIED，后者使用新名称。</p>
+    <p><strong>Purpose 与主规范</strong>：新 capability 的 Delta 可先写 <code>## Purpose</code>，创建主规范时沿用它。已有 capability 的 Purpose 要直接编辑所选根下的 <code>openspec/specs/&lt;capability-path&gt;/spec.md</code>，不是放进 Delta。主规范将需求和场景放在 <code>## Requirements</code> 下，不应含四种 Delta 操作节。</p>
+    <div class="tip-box">
+      <strong>提前 sync 不等于免检</strong>：已应用且内容一致的 ADDED/MODIFIED、已删除的 REMOVED、旧名消失且新名存在的 RENAMED 会按已同步处理，可为 no-op。ADDED 内容碰撞、缺失的 MODIFIED 目标、重命名碰撞或场景丢失仍会阻塞合并，不能靠“已 sync”跳过冲突。
     </div>
   </div>
 
   <!-- Schema 机制 -->
   <div class="subsection" id="concepts-schemas">
     <h3>Schema 机制</h3>
-    <p>Schema 定义工作流的产物类型及其依赖关系。默认 Schema 为 <code>spec-driven</code>：</p>
+    <p>Schema 定义产物、输出路径、模板、指令与依赖，也定义 apply 的入口和任务跟踪。默认工作流为 <code>spec-driven</code>。</p>
     <div class="code-block">
-      <div class="code-header"><span>schema.yaml 示例</span></div>
+      <div class="code-header"><span>schema.yaml 结构摘录（非完整可运行 schema）</span></div>
       <pre><code>name: spec-driven
+version: 1
 artifacts:
   - id: proposal
     generates: proposal.md
@@ -376,7 +442,7 @@ artifacts:
 
   - id: specs
     generates: specs/**/*.md
-    requires: [proposal]      # 需要提案后才能创建
+    requires: [proposal]      # 依赖 proposal 产物
 
   - id: design
     generates: design.md
@@ -384,7 +450,11 @@ artifacts:
 
   - id: tasks
     generates: tasks.md
-    requires: [specs, design] # 需要 specs 和 design 都完成</code></pre>
+    requires: [specs, design] # 依赖 specs 和 design 产物
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md</code></pre>
     </div>
     <div class="dependency-graph">
       <div class="dep-node dep-root">proposal<br><small>根节点</small></div>
@@ -394,11 +464,15 @@ artifacts:
       </div>
       <div class="dep-node dep-leaf">tasks<br><small>依赖: specs + design</small></div>
     </div>
+    <p><strong>摘录不是安装文件</strong>：完整 schema 的 version 必须为正整数，每个产物需要 description 与 template，模板文件也须存在。上例省略这些字段及 instruction 内容；自定义工作流应提供适合产物和 apply 的指令。</p>
+    <p><strong>声明顺序</strong>：依赖决定何时 ready；同时 ready 的产物按 artifacts 列表声明顺序排列，不按字母排序。文件存在只满足规划依赖，不是内容验收。</p>
+    <p><strong>apply 校验</strong>：未知 <code>apply.requires</code> id 在加载 schema 时直接报错。<code>apply.tracks</code> 与所有 <code>generates</code> 字符串都不完全相同时，<code>openspec schema validate</code> 给出 warning；即使 glob 实际覆盖 tracks 文件也会警告。这不阻止加载，但可能使任务进度回退到顶层 tasks.md。</p>
   </div>
 
   <!-- 完整流程 -->
   <div class="subsection" id="concepts-archive">
     <h3>完整工作流程</h3>
+    <p>按所选 schema 的 instructions 创建产物并实现任务。以下是默认工作流，不能把固定文件名或箭头顺序套到所有自定义 schema。</p>
     <div class="flow-diagram">
       <div class="flow-step">
         <div class="flow-num">1</div>
@@ -427,8 +501,8 @@ artifacts:
       <div class="flow-step">
         <div class="flow-num">4</div>
         <div class="flow-text">
-          <strong>验证工作（可选）</strong><br>
-          <code>/opsx:verify</code>
+          <strong>核对实现与测试证据</strong><br>
+          可用 <code>/opsx:verify</code> 辅助检查；不替代实际测试
         </div>
       </div>
       <div class="flow-arrow-v">↓</div>
@@ -436,9 +510,16 @@ artifacts:
         <div class="flow-num">5</div>
         <div class="flow-text">
           <strong>归档变更</strong><br>
-          Delta 合并入主规范，变更文件夹移至 archive/
+          完成同步与检查后，将变更目录移至 archive/
         </div>
       </div>
+    </div>
+    <p><strong>任务勾选不是验证记录</strong>：只把 x/X 复选框计为完成，其他标记仍未完成。按 schema 解析真实跟踪文件与 glob，不能由 tasks.md 缺失或产物 done 推断任务完成。全勾选也不证明实现、测试或审查通过。</p>
+    <p><strong>同步成功后再移动</strong>：选择同步时，遵循所选 schema 的 specs 指令与项目规则，等待 sync 完成并逐 capability 对照主规范。仅在没有 stop、blocking 或未应用差异时移动目录；已提前同步的变更仍需核对。用户明确选择跳过同步时，报告“sync skipped”，不要声称已合并。</p>
+    <p><strong>失败时保全</strong>：sync 失败或报告 blocking 时停止归档，保留活跃变更目录。CLI 在写入前检查所有待合并规范及目标目录；写入或移动失败时尝试回滚已做修改。若并发修改阻止安全回滚，保留并检查报告的恢复路径，不覆盖他人修改。</p>
+    <p><strong>归档日期</strong>：目录为 <code>openspec/changes/archive/YYYY-MM-DD-&lt;change-name&gt;/</code>，日期取本地时区，不取 UTC。变更名已有日期前缀则沿用，不重复加日期；目标已存在时停止。</p>
+    <div class="tip-box">
+      <strong>CLI 选项边界</strong>：<code>archive --skip-specs</code> 明确跳过主规范合并。<code>--no-validate</code> 跳过验证，但不消除合并冲突，且不会执行 capability retirement；即使设置 retire_capabilities: true，也不能在无验证时据此自动删除 live spec。
     </div>
   </div>
 
@@ -452,7 +533,11 @@ artifacts:
           <tr><td><strong>产物 (Artifact)</strong></td><td>变更中的文档（proposal、design、tasks 或 Delta 规范）</td></tr>
           <tr><td><strong>归档 (Archive)</strong></td><td>完成变更并将其 Delta 合并到主规范的过程</td></tr>
           <tr><td><strong>变更 (Change)</strong></td><td>打包为带有产物的文件夹的系统提议修改</td></tr>
-          <tr><td><strong>Delta 规范</strong></td><td>描述变化（ADDED/MODIFIED/REMOVED）的规范</td></tr>
+          <tr><td><strong>Delta 规范</strong></td><td>描述变化（ADDED/MODIFIED/REMOVED/RENAMED）的规范</td></tr>
+          <tr><td><strong>RENAMED</strong></td><td>以 FROM/TO 配对重命名需求，保留原有正文与场景</td></tr>
+          <tr><td><strong>Store</strong></td><td>本机按名称登记的独立 OpenSpec 规划 repo，含 openspec/ 与 .openspec-store/store.yaml</td></tr>
+          <tr><td><strong>Reference</strong></td><td>references 声明的只读上游 store 上下文，不改变命令根</td></tr>
+          <tr><td><strong>Workset</strong></td><td>个人本机文件夹视图，不是共享规划或跨 repo 写授权</td></tr>
           <tr><td><strong>领域 (Domain)</strong></td><td>规范的逻辑分组（如 auth/、payments/）</td></tr>
           <tr><td><strong>需求 (Requirement)</strong></td><td>系统必须具备的具体行为</td></tr>
           <tr><td><strong>场景 (Scenario)</strong></td><td>需求的具体示例，通常采用 Given/When/Then 格式</td></tr>

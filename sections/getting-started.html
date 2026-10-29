@@ -3,16 +3,51 @@
   <div class="section-header">
     <span class="section-tag">安装</span>
     <h2>安装指南</h2>
-    <p>需要 Node.js 20.19.0 或更高版本</p>
+    <p>独立二进制无需 Node.js；使用 npm、pnpm、yarn 或 bun 安装需 Node.js 20.19.0 或更高版本</p>
   </div>
   <div class="install-tabs">
-    <button class="tab-btn active" data-tab="npm">npm</button>
+    <button class="tab-btn active" data-tab="standalone">独立安装</button>
+    <button class="tab-btn" data-tab="npm">npm</button>
     <button class="tab-btn" data-tab="pnpm">pnpm</button>
     <button class="tab-btn" data-tab="yarn">yarn</button>
     <button class="tab-btn" data-tab="bun">bun</button>
     <button class="tab-btn" data-tab="nix">Nix</button>
   </div>
-  <div class="tab-content active" data-content="npm">
+  <div class="tab-content active" data-content="standalone">
+    <div class="code-block">
+      <div class="code-header"><span>macOS / Linux · bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>curl -fsSL https://raw.githubusercontent.com/Fission-AI/OpenSpec/main/scripts/binary/install.sh | sh</code></pre>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span>Windows · PowerShell</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>irm https://raw.githubusercontent.com/Fission-AI/OpenSpec/main/scripts/binary/install.ps1 | iex</code></pre>
+    </div>
+    <p><strong>SHA256 校验：</strong>脚本选择最新且资产齐全的发布版，按平台下载，并对照该发布的 <code>SHA256SUMS</code> 验证。</p>
+    <ul>
+      <li><strong>macOS / Linux：</strong>默认安装到 <code>~/.local/bin</code>，确认该目录已在 PATH。</li>
+      <li><strong>Windows：</strong>默认安装到 <code>%LOCALAPPDATA%\Programs\openspec</code>，脚本加入用户 PATH；打开新终端生效。</li>
+      <li><code>OPENSPEC_INSTALL_DIR</code>：覆盖安装目录。</li>
+      <li><code>OPENSPEC_VERSION=v1.15.0</code>：锁定发布版本；PowerShell 使用 <code>$env:OPENSPEC_VERSION = 'v1.15.0'</code>。</li>
+    </ul>
+    <div class="code-block">
+      <div class="code-header"><span>macOS / Linux · 锁定版本和目录</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>curl -fsSL https://raw.githubusercontent.com/Fission-AI/OpenSpec/main/scripts/binary/install.sh | OPENSPEC_VERSION=v1.15.0 OPENSPEC_INSTALL_DIR="$HOME/.local/bin" sh</code></pre>
+    </div>
+    <div class="table-wrapper">
+      <table class="doc-table">
+        <thead><tr><th>平台</th><th>二进制</th></tr></thead>
+        <tbody>
+          <tr><td>macOS 13+（Apple Silicon / Intel）</td><td><code>openspec-darwin-arm64</code> / <code>openspec-darwin-x64</code></td></tr>
+          <tr><td>Linux（glibc 2.17+）</td><td><code>openspec-linux-x64</code> / <code>openspec-linux-arm64</code></td></tr>
+          <tr><td>Alpine 3.17+</td><td><code>openspec-linux-x64-musl</code> / <code>openspec-linux-arm64-musl</code>；先安装 <code>libstdc++</code>、<code>libgcc</code></td></tr>
+          <tr><td>Windows 10+</td><td><code>openspec-windows-x64.exe</code> / <code>openspec-windows-arm64.exe</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>手动安装：</strong>从<a href="https://github.com/Fission-AI/OpenSpec/releases/latest" target="_blank" rel="noopener noreferrer">发布页</a>下载对应文件和 <code>SHA256SUMS</code>，校验后重命名为 <code>openspec</code>（Windows 为 <code>openspec.exe</code>）并放入 PATH。macOS/Linux 执行 <code>chmod +x openspec</code>。macOS 浏览器下载的文件可能还需 <code>xattr -d com.apple.quarantine openspec</code>。</p>
+    <p>命令可直接复制；安装需要联网并写入本机目录，请先审查脚本。此页面不会自动执行安装。</p>
+  </div>
+  <div class="tab-content" data-content="npm">
     <div class="code-block">
       <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
       <pre><code>npm install -g @fission-ai/openspec@latest</code></pre>
@@ -29,6 +64,7 @@
       <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
       <pre><code>yarn global add @fission-ai/openspec@latest</code></pre>
     </div>
+    <p>仅 Yarn 1.x 支持 global；Yarn 2+ 请改用 npm、pnpm 或 bun。</p>
   </div>
   <div class="tab-content" data-content="bun">
     <div class="code-block">
@@ -37,7 +73,7 @@
     </div>
     <div class="info-box" style="margin-top:12px">
       <div class="info-icon">ℹ️</div>
-      <div>Bun 可以全局安装 OpenSpec，但 OpenSpec 当前仍在 Node.js 上运行。<strong>PATH 上仍需有 Node.js 20.19.0 或更高版本</strong>。</div>
+      <div>Bun 可以全局安装 OpenSpec。此包管理器安装方式仍使用 Node.js，<strong>PATH 上需有 Node.js 20.19.0 或更高版本</strong>；独立二进制不需要 Node.js。</div>
     </div>
   </div>
   <div class="tab-content" data-content="nix">
@@ -54,8 +90,25 @@
     <div class="info-icon">💡</div>
     <div>
       <strong>验证安装</strong><br>
-      <code>openspec --version</code>
+      <code>openspec --version</code> 查看版本；<code>openspec version</code> 确认安装来源，<code>openspec version --check</code> 检查升级。
     </div>
+  </div>
+  <div class="subsection">
+    <h3>升级 CLI，再刷新项目</h3>
+    <ol>
+      <li><strong>升级 CLI：</strong>独立安装重新运行上方安装脚本；包管理器安装使用原方式升级。</li>
+      <li><strong>审查计划：</strong>在每个项目内运行 <code>openspec update --dry-run</code>，检查待改文件和失败项。</li>
+      <li><strong>刷新文件：</strong>确认后运行 <code>openspec update</code>。</li>
+    </ol>
+    <div class="code-block">
+      <div class="code-header"><span>终端 · npm 安装方式</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+      <pre><code>npm install -g @fission-ai/openspec@latest
+openspec update --dry-run
+# 审查计划后再执行
+openspec update</code></pre>
+    </div>
+    <p><strong>生成文件：</strong>update 会重写工具技能和命令文件，不能承诺保留手改。先备份。JSON 计划使用 <code>openspec update --dry-run --json</code>，<code>--json</code> 不能单独使用。</p>
+    <p><strong>切换独立安装：</strong><code>openspec install</code>（或 <code>openspec install v1.15.0</code>）不会自动卸载旧副本。按输出提示手动处理旧安装；旧副本可能仍优先命中 PATH。用 <code>which -a openspec</code>（Windows：<code>where.exe openspec</code>）检查，新终端运行 <code>openspec version</code> 应显示 standalone。</p>
   </div>
 </section>
 
@@ -67,6 +120,8 @@
     <p>初始化项目，与 AI 协作完成一个完整的功能开发流程</p>
   </div>
 
+  <p><strong>工具调用：</strong>下面的 <code>/opsx:</code> 示例使用 Claude Code 拼写。Codex 使用 <code>$openspec-propose</code>，Kimi Code 使用 <code>/skill:openspec-propose</code> 等技能形式；按<a href="#tool-invocation">工具调用对照</a>替换，不要照搬标点。</p>
+
   <div class="steps-container">
     <div class="step">
       <div class="step-number">1</div>
@@ -76,15 +131,16 @@
         <div class="code-block">
           <div class="code-header"><span>bash</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
           <pre><code>cd your-project
-openspec init</code></pre>
+openspec init --language '简体中文'</code></pre>
         </div>
+        <p><code>--language</code> 设置新规划产物的语言。选择实际使用的 AI 工具，重启或重载后确认技能可用。Copilot 云端 coding agent 文件需 opt-in，详见<a href="#cli-setup">初始化选项</a>。</p>
       </div>
     </div>
     <div class="step">
       <div class="step-number">2</div>
       <div class="step-content">
         <h3>创建你的第一个变更</h3>
-        <p>在 AI 对话窗口中，使用 <code>/opsx:propose</code> 命令描述你想要构建的功能。AI 会自动创建所有必要的规划产物。</p>
+        <p>在 AI 对话中调用 propose 技能，描述目标，让 AI 生成提案、规范、设计和任务清单。生成后先审查这些规划产物。</p>
         <div class="code-block">
           <div class="code-header"><span>AI 对话</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
           <pre><code>/opsx:propose add-dark-mode</code></pre>
@@ -95,7 +151,7 @@ openspec init</code></pre>
       <div class="step-number">3</div>
       <div class="step-content">
         <h3>实现任务</h3>
-        <p>规划产物生成完毕后，运行 <code>/opsx:apply</code> 让 AI 按照任务清单逐步实现代码。</p>
+        <p>用户审查并确认规划后，再调用 apply 技能按任务清单实现。发现规划需调整时先调用 update 技能，不要直接扩大实现范围。</p>
         <div class="code-block">
           <div class="code-header"><span>AI 对话</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
           <pre><code>/opsx:apply</code></pre>
@@ -105,8 +161,14 @@ openspec init</code></pre>
     <div class="step">
       <div class="step-number">4</div>
       <div class="step-content">
-        <h3>归档变更</h3>
-        <p>完成实现后，运行 <code>/opsx:archive</code> 将 Delta 规范合并到主规范，并将变更文件夹移至归档目录。</p>
+        <h3>验证后归档</h3>
+        <p>先审查实现、运行项目测试，并验证规范。任务打勾和规划齐全都不等于验证通过。</p>
+        <div class="code-block">
+          <div class="code-header"><span>终端 · 规范验证</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+          <pre><code>openspec validate add-dark-mode</code></pre>
+        </div>
+        <p>确认结果后调用 archive 技能。默认先校验并合并 Delta，成功后才移动变更目录；校验或合并失败不归档，CLI 以非零退出。</p>
+        <p><strong>sync 可提前：</strong>需要先更新主规范时调用 sync 技能，但不是每次归档的必需步骤。同步失败先修复，不继续归档。</p>
         <div class="code-block">
           <div class="code-header"><span>AI 对话</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
           <pre><code>/opsx:archive</code></pre>
@@ -118,13 +180,14 @@ openspec init</code></pre>
   <div class="info-box info-tip">
     <div class="info-icon">🔥</div>
     <div>
-      <strong>新功能：扩展工作流</strong><br>
-      如需更细粒度的控制（<code>/opsx:new</code>、<code>/opsx:ff</code>、<code>/opsx:verify</code> 等），
-      运行 <code>openspec config profile</code> 选择工作流，然后执行 <code>openspec update</code> 更新配置。
+      <strong>选择工作流</strong><br>
+      Core 默认提供 <code>propose</code>、<code>explore</code>、<code>apply</code>、<code>update</code>、<code>sync</code>、<code>archive</code> 六个技能。此处 update 是 AI 技能，不是终端的 <code>openspec update</code>。<br>
+      如需 <code>new</code>、<code>ff</code>、<code>verify</code> 等扩展技能，运行 <code>openspec config profile</code> 选择工作流，再依次执行 <code>openspec update --dry-run</code> 和 <code>openspec update</code>。调用方式见<a href="#tool-invocation">工具调用对照</a>。
     </div>
   </div>
 
-  <h3 style="margin-top: 2rem;">初始化后的目录结构</h3>
+  <h3 style="margin-top: 2rem;">初始化与首个变更后的目录结构</h3>
+  <p>init 创建规划目录，propose 才生成首个变更的规划文件；归档后该变更位于 <code>changes/archive/</code>。</p>
   <div class="code-block">
     <div class="code-header"><span>目录结构</span></div>
     <pre><code>openspec/
